@@ -1,5 +1,4 @@
-#ifndef PARSER_H_DATALOG_H
-#define PARSER_H_DATALOG_H
+#pragma once
 
 #include "Lexer.h"
 #include "Parser.h"
@@ -23,5 +22,3 @@ class Datalog
 	Parser parser;
 
 };
-
-#endif //PARSER_H_DATALOG_H
