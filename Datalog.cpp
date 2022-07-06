@@ -1,7 +1,3 @@
-//
-// Created by Brandon on 7/6/2022.
-//
-
 #include "Datalog.h"
 
 vector<Token> LexTokens(const string& input)

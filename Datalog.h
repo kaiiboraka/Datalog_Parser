@@ -1,7 +1,3 @@
-//
-// Created by Brandon on 7/6/2022.
-//
-
 #ifndef PARSER_H_DATALOG_H
 #define PARSER_H_DATALOG_H
 
@@ -27,6 +23,5 @@ class Datalog
 	Parser parser;
 
 };
-
 
 #endif //PARSER_H_DATALOG_H
