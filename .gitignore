@@ -3,6 +3,7 @@
 /.idea
 /cmake-build-debug
 /WindowsEndlines
+/project1-exampleIO
 /Project2aPassOffCases
 *.html
 out_*
@@ -12,7 +13,9 @@ out_*
 *.zip
 *.rar
 *.txt
+*.7z
 lab*
+project*
 
 # Prerequisites
 *.d
