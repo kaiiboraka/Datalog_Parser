@@ -1,4 +1,4 @@
-#include "Datalog.h"
+#include "Program.h"
 
 vector<Token> LexTokens(const string& input)
 {

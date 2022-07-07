@@ -16,7 +16,7 @@ string TryReadArgs(const string& argv);
 
 vector<Token> LexTokens(const string& input);
 
-class Datalog
+class Program
 {
 	Lexer lexer;
 	Parser parser;
