@@ -1,9 +1,4 @@
-//
-// Created by Brandon on 6/30/2022.
-//
-
-#ifndef LAB1_PARSER_H
-#define LAB1_PARSER_H
+#pragma once
 
 #include "Token.h"
 
@@ -11,11 +6,12 @@ using namespace Tokens;
 
 class Parser
 {
-	const unsigned int NEXT = 1;
+	static const unsigned int NEXT = 1;
 
 	vector<Token> tokens;
-	unsigned int currTokenIdx;
-	unsigned int step;
+
+	unsigned int currTokenIdx, step;
+
 	vector<TokenType> steps =
 		{
 			SCHEMES,
@@ -26,6 +22,9 @@ class Parser
 		};
 
 public:
+
+	Parser() = default;
+
 	explicit Parser(const vector<Token>& tokens);
 
 	string CurrTokenString();
@@ -106,8 +105,4 @@ public:
 
 	void QueryList();
 
-
 };
-
-
-#endif //LAB1_PARSER_H

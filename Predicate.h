@@ -4,17 +4,22 @@
 
 class Predicate
 {
-	vector<Parameter> parameters;
 	string name;
+	vector<Parameter> parameters;
+
 public:
 	Predicate() = default;
 	Predicate(vector<Parameter>& parameters, const string& name)
-		: parameters(parameters), name(name) {}
-	[[nodiscard]] const vector<Parameter>& GetParameters() const;
-	void SetParameters(const vector<Parameter>& parameters);
-	[[nodiscard]] const string& GetName() const;
-	void SetName(const string& name);
+		: name(name), parameters(parameters){}
 
+	[[nodiscard]] const string& GetName() const;
+	[[nodiscard]] const vector<Parameter>& GetParameters() const;
+
+	void SetName(const string& newName);
+	void SetParameters(const vector<Parameter>& newParameters);
+
+	void AddParameter(const Parameter& newParameter);
 	void AddParameter(const string& parameterValue);
-	string ToString();
+
+	[[nodiscard]] string ToString() const;
 };

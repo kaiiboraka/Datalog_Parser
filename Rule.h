@@ -1,16 +1,23 @@
 #pragma once
+
 #include "Predicate.h"
 
 class Rule
 {
 	Predicate head;
 	vector<Predicate> body;
+
 public:
 	Rule() = default;
 	Rule(Predicate& head, vector<Predicate>& body)
-	: head(head), body(body) {}
+		: head(head), body(body) {}
+
 	[[nodiscard]] const Predicate& GetHead() const;
-	void SetHead(const Predicate& head);
 	[[nodiscard]] const vector<Predicate>& GetBody() const;
-	void SetBody(const vector<Predicate>& body);
+	void SetHead(const Predicate& newHead);
+	void SetBody(const vector<Predicate>& newBody);
+
+	void AddPredicate(const Predicate& predicate);
+
+	[[nodiscard]] string ToString() const;
 };

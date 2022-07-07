@@ -1,7 +1,11 @@
 #include "Parser.h"
 
-Parser::Parser(const vector<Token>& tokens) : tokens(tokens), currTokenIdx(0), step(0)
-{}
+Parser::Parser(const vector<Token>& tokens)
+	: tokens(tokens), currTokenIdx(0), step(0)
+{
+	currTokenIdx = 0;
+	step = 0;
+}
 
 TokenType Parser::CurrTokenType()
 {
@@ -390,3 +394,4 @@ void Parser::IDList()
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
+

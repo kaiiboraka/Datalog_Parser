@@ -50,7 +50,7 @@ namespace Tokens
 		"TYPE_COUNT"
 	};
 
-	static const map<TokenType, string> Symbols =
+	static map<TokenType, string> Symbols =
 	{
 		{COMMA,       ","},
 		{PERIOD,      "."},
@@ -72,6 +72,11 @@ namespace Tokens
 		{END_OF_FILE, ""},
 		{TYPE_COUNT,  ""},
 	};
+
+	static string SpacedToken(TokenType token)
+	{
+		return string(" " + Symbols[token] + " ");
+	}
 
 	class Token
 	{

@@ -1,5 +1,8 @@
 #pragma once
+
 #include "Helper.h"
+#include "Token.h"
+using namespace Tokens;
 
 class Parameter
 {
@@ -9,7 +12,8 @@ public:
 	explicit Parameter(const string& value)
 		: value(value) {}
 
-	[[nodiscard]] const string& ToString() const;
 	void SetValue(const string& value);
+
+	[[nodiscard]] const string& ToString() const;
 };
 

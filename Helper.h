@@ -10,6 +10,7 @@
 #include <iomanip>
 
 #include "Debugger.h"
+#include "nameof.hpp"
 
 using namespace std;
 

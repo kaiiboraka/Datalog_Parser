@@ -1,27 +1,28 @@
-//
-// Created by Brandon on 7/7/2022.
-//
-
 #include "Predicate.h"
-
-const vector<Parameter>& Predicate::GetParameters() const
-{
-	return parameters;
-}
-
-void Predicate::SetParameters(const vector<Parameter>& parameters)
-{
-	Predicate::parameters = parameters;
-}
 
 const string& Predicate::GetName() const
 {
 	return name;
 }
 
-void Predicate::SetName(const string& name)
+const vector<Parameter>& Predicate::GetParameters() const
 {
-	Predicate::name = name;
+	return parameters;
+}
+
+void Predicate::SetName(const string& newName)
+{
+	name = newName;
+}
+
+void Predicate::SetParameters(const vector<Parameter>& newParameters)
+{
+	parameters = newParameters;
+}
+
+void Predicate::AddParameter(const Parameter& newParameter)
+{
+	parameters.push_back(newParameter);
 }
 
 void Predicate::AddParameter(const string& parameterValue)
@@ -29,15 +30,16 @@ void Predicate::AddParameter(const string& parameterValue)
 	parameters.emplace_back(parameterValue);
 }
 
-string Predicate::ToString()
+string Predicate::ToString() const
 {
 	string sep;
 	stringstream out;
-	out << name << "(";
-	for (const Parameter& currParam : parameters) {
+	out << name << Symbols[LEFT_PAREN];
+	for (const Parameter& currParam : parameters)
+	{
 		out << sep << currParam.ToString();
-		sep = ",";
+		sep = Symbols[COMMA];
 	}
-	out << ")";
+	out << Symbols[RIGHT_PAREN];
 	return out.str();
 }
