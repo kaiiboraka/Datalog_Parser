@@ -1,23 +1,5 @@
 #include "DatalogProgram.h"
 
-vector<Token> DatalogProgram::LexTokens(const string& input)
-{
-	return lexer.Run(input);
-}
-
-void DatalogProgram::TryParse(const vector<Token>& tokens, ostream& os)
-{
-	try
-	{
-		parser = Parser(tokens);
-		parser.Run();
-		os << "Success!" << endl;
-	}
-	catch (Token& errorToken)
-	{
-		os << "Failure!" << endl << "  " << errorToken.ToString() << endl;
-	}
-}
 void DatalogProgram::AddScheme(const Predicate& scheme)
 {
 	schemes.push_back(scheme);
@@ -71,7 +53,7 @@ Output DatalogProgram::DetermineOutput(const TokenType& type)
 		case QUERIES:
 			return Output(TokenNames[type], queries.size(), GetStrings(queries), Symbols[Q_MARK]);
 		case STRING:
-			return Output(Helper::ToCapitalized(string(NAMEOF(domain))), domain.size(), GetStrings(), Symbols[type], Symbols[type]);
+			return Output(string(NAMEOF(domain)), domain.size(), GetStrings(), Symbols[type], Symbols[type]);
 	}
 
 	return Output();

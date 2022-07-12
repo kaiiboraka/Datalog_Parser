@@ -85,9 +85,16 @@ namespace Tokens
 		unsigned int line;
 	public:
 
-		Token(const TokenType& newType, const string& newValue, const unsigned int& newLine)
+		Token()
+		{
+			type = UNDEFINED;
+			value = Symbols[UNDEFINED];
+			line = 0;
+		}
+		Token(const string& newValue, const TokenType& newType = UNDEFINED, const unsigned int& newLine = 0)
 				: type(newType), value(newValue), line(newLine)
 		{}
+
 		const string& GetValue() const
 		{
 			return value;

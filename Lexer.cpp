@@ -31,8 +31,6 @@ const vector<Token>& Lexer::GetTokens() const
 
 vector<Token> Lexer::Run(const string& outsideInput)
 {
-	InitializeAutomata();
-
 	string reducedInput = outsideInput;
 	unsigned int line = 1;
 	while (!reducedInput.empty())
@@ -40,7 +38,7 @@ vector<Token> Lexer::Run(const string& outsideInput)
 		RunAutomata(reducedInput, line);
 	}
 
-	AddToken(Token(END_OF_FILE, Symbols.at(END_OF_FILE), line));
+	AddToken(Token(Symbols.at(END_OF_FILE), END_OF_FILE, line));
 
 	if (Debugger::enabled)
 	{
@@ -87,7 +85,7 @@ void Lexer::RunAutomata(string& input, unsigned int& lineNum)
 	{
 		return;
 	}
-	AddToken(Token(maxAutomaton->GetType(), substr, lineNum));
+	AddToken(Token(substr, maxAutomaton->GetType(), lineNum));
 	lineNum += maxAutomaton->GetNewLines();
 
 	input = input.substr(maxRead, input.size());

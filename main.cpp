@@ -1,4 +1,4 @@
-#include "DatalogProgram.h"
+#include "Parser.h"
 #include <fstream>
 
 const string ROOT_PATH = "../";
@@ -9,17 +9,21 @@ string TryReadFile(const string& path);
 
 string TryReadArgs(const string& argv);
 
+void TryParse(const vector<Token>& tokens, ostream& os = cout);
+
 int main(int argc, char* argv[])
 {
-	DatalogProgram dp;
 
 //	string input = (argc <= 1) ?
 //				   TryReadFile(FILE_PATH) :
 //				   TryReadArgs(argv[1]);
 //
-//	auto tokens = dp.LexTokens(input);
+//	Lexer l;
+//	auto tokens = l.Run(input);
 //
-//	dp.TryParse(tokens, cout);
+//	TryParse(tokens);
+
+	DatalogProgram program;
 
 	Predicate snapScheme;
 	snapScheme.SetName("snap");
@@ -27,10 +31,37 @@ int main(int argc, char* argv[])
 	snapScheme.AddParameter("N");
 	snapScheme.AddParameter("A");
 	snapScheme.AddParameter("P");
+	program.AddScheme(snapScheme);
 
-	dp.AddScheme(snapScheme);
+	Predicate addressScheme;
+	addressScheme.SetName("HasSameAddress");
+	addressScheme.AddParameter("X");
+	addressScheme.AddParameter("Y");
+	program.AddScheme(addressScheme);
 
-	cout << dp.ToString();
+	Predicate snapFact;
+	snapFact.SetName("snap");
+	snapFact.AddParameter("\'12345\'");
+	snapFact.AddParameter("\'C.Brown\'");
+	snapFact.AddParameter("\'12 Apple\'");
+	snapFact.AddParameter("\'555-1234\'");
+	program.AddFact(snapFact);
+
+	Rule addressRule;
+	addressRule.SetHead(addressScheme);
+	addressRule.AddPredicate(snapScheme);
+	addressRule.AddPredicate(snapScheme);
+	program.AddRule(addressRule);
+
+	Predicate addressQuery;
+	addressQuery.SetName("HasSameAddress");
+	addressQuery.AddParameter("\'Snoopy\'");
+	addressQuery.AddParameter("Who");
+	program.AddQuery(addressQuery);
+
+	program.AddStringToDomain("12 Apple");
+
+	cout << program.ToString();
 
 	return 0;
 }
@@ -59,3 +90,20 @@ string TryReadArgs(const string& argv)
 	return output;
 }
 
+void TryParse(const vector<Token>& tokens, ostream& os)
+{
+	try
+	{
+		Parser parser = Parser(tokens);
+		parser.Run();
+		os << "Success!" << endl;
+	}
+	catch (Token& errorToken)
+	{
+		os << "Failure!" << endl << "  " << errorToken.ToString() << endl;
+	}
+	catch (const string& errorMsg)
+	{
+		os << "Failure!" << endl << "  " << errorMsg << endl;
+	}
+}

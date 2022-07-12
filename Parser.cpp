@@ -18,16 +18,22 @@ void Parser::AdvanceToken()
 	currTokenIdx++;
 }
 
-void Parser::ThrowError()
+void Parser::ThrowError(bool problem = false)
 {
 	if (currTokenIdx >= tokens.size()) throw tokens.at(tokens.size() - 1);
-	throw tokens.at(currTokenIdx);
+	if (currTokenIdx < 0) throw Token("Out of bounds");
+	if (problem) throw tokens.at(currTokenIdx);
 }
 
+string Parser::PrevTokenString()
+{
+	ThrowError();
+	return tokens.at(currTokenIdx - 1).ToString();
+}
 
 string Parser::CurrTokenString()
 {
-	if (currTokenIdx >= tokens.size()) return TokenNames[UNDEFINED];
+	ThrowError();
 	return tokens.at(currTokenIdx).ToString();
 }
 
@@ -58,12 +64,24 @@ void Parser::Match(TokenType expectedType)
 									<< TokenNames[CurrTokenType()]);
 		DEBUG_MSG(" expected: " << TokenNames[expectedType]);
 		// TODO: think about what should happen if the Parser matches an UN-expected Token
-		ThrowError();
+		ThrowError(true);
 	}
 
 }
 
-void Parser::CheckForComments()
+void Parser::RemoveComments()
+{
+	for (int i = 0; i < tokens.size(); ++i)
+	{
+		if (tokens.at(i).GetType() == COMMENT)
+		{
+			tokens.erase(tokens.begin() + i);
+		}
+	}
+}
+
+
+[[maybe_unused]] void Parser::CheckForComments()
 {
 	if (CurrTokenType() == COMMENT)
 	{
@@ -93,10 +111,11 @@ void Parser::PrintEnd(const string& funcName) const
 	DEBUG_MSG("<<< end " << __FUNCTION__ << "()" << endl);
 }
 
-void Parser::Run()
+DatalogProgram Parser::Run()
 {
 	//TODO: call Start production function. should be datalog program
 	DatalogProgram();
+	return dp;
 }
 
 #ifndef __GNUC__
@@ -144,30 +163,31 @@ void Parser::DatalogProgram()
 	step = 0;
 	if (Debugger::enabled) PrintStep();
 
-	CheckForComments();
+	RemoveComments();
+
 	Match(SCHEMES);
 	Match(COLON);
-	Scheme();
-	SchemeList();
+	ParseScheme();
+	ParseSchemeList();
 	step++;
 	if (Debugger::enabled) PrintStep();
 
 	Match(FACTS);
 	Match(COLON);
-	FactList();
+	ParseFactList();
 	step++;
 	if (Debugger::enabled) PrintStep();
 
 	Match(RULES);
 	Match(COLON);
-	RuleList();
+	ParseRuleList();
 	step++;
 	if (Debugger::enabled) PrintStep();
 
 	Match(QUERIES);
 	Match(COLON);
-	Query();
-	QueryList();
+	ParseQuery();
+	ParseQueryList();
 	step++;
 	if (Debugger::enabled) PrintStep();
 
@@ -181,53 +201,53 @@ void Parser::DatalogProgram()
 //	queryList	->	query queryList | lambda
 
 // schemeList -> scheme schemeList | lambda
-void Parser::SchemeList()
+void Parser::ParseSchemeList()
 {
 	if (Debugger::enabled) PrintStart(__FUNCTION__, "schemeList -> scheme schemeList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() == steps.at(NEXT + step)) return;
 
-	Scheme();
-	SchemeList();
+	ParseScheme();
+	ParseSchemeList();
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 // factList -> fact factList | lambda
-void Parser::FactList()
+void Parser::ParseFactList()
 {
 	if (Debugger::enabled) PrintStart(__FUNCTION__, "factList -> fact factList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() == steps.at(NEXT + step))
 	{ return; }
 
-	Fact();
-	FactList();
+	ParseFact();
+	ParseFactList();
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 // ruleList -> rule ruleList | lambda
-void Parser::RuleList()
+void Parser::ParseRuleList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "ruleList -> rule ruleList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() == steps.at(NEXT + step))
 	{ return; }
 
-	Rule();
-	RuleList();
+	ParseRule();
+	ParseRuleList();
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 // queryList -> query queryList | lambda
-void Parser::QueryList()
+void Parser::ParseQueryList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "queryList -> query queryList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() == steps.at(NEXT + step))
 	{ return; }
 
-	Query();
-	QueryList();
+	ParseQuery();
+	ParseQueryList();
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
@@ -237,55 +257,66 @@ void Parser::QueryList()
 //	query	    ->  predicate Q_MARK
 
 // scheme -> ID LEFT_PAREN ID idList RIGHT_PAREN
-void Parser::Scheme()
+void Parser::ParseScheme()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "scheme -> ID LEFT_PAREN ID idList RIGHT_PAREN");
-	CheckForComments();
+
+	Predicate newScheme;
 
 	Match(ID);
+	newScheme.SetName(PrevTokenString());
+
 	Match(LEFT_PAREN);
 	Match(ID);
-	IDList();
+	newScheme.AddParameter(PrevTokenString());
+
+	ParseIDList();
+
+
+
 	Match(RIGHT_PAREN);
+
+	dp.AddScheme(newScheme);
+
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 // fact -> ID LEFT_PAREN STRING stringList RIGHT_PAREN PERIOD
-void Parser::Fact()
+void Parser::ParseFact()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "fact -> ID LEFT_PAREN STRING stringList RIGHT_PAREN PERIOD");
-	CheckForComments();
+
 
 	Match(ID);
 	Match(LEFT_PAREN);
 	Match(STRING);
-	StringList();
+	ParseStringList();
 	Match(RIGHT_PAREN);
 	Match(PERIOD);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 // rule -> headPredicate COLON_DASH predicate predicateList PERIOD
-void Parser::Rule()
+void Parser::ParseRule()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "rule -> headPredicate COLON_DASH predicate predicateList PERIOD");
-	CheckForComments();
 
-	HeadPredicate();
+
+	ParseHeadPredicate();
 	Match(COLON_DASH);
-	Predicate();
-	PredicateList();
+	ParsePredicate();
+	ParsePredicateList();
 	Match(PERIOD);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 //	query	    ->  predicate Q_MARK
-void Parser::Query()
+void Parser::ParseQuery()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "query -> predicate Q_MARK");
-	CheckForComments();
 
-	Predicate();
+
+	ParsePredicate();
 	Match(Q_MARK);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
@@ -295,28 +326,28 @@ void Parser::Query()
 //	predicate		->	ID LEFT_PAREN parameter parameterList RIGHT_PAREN
 
 //	headPredicate	->	ID LEFT_PAREN ID idList RIGHT_PAREN
-void Parser::HeadPredicate()
+void Parser::ParseHeadPredicate()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "headPredicate -> ID LEFT_PAREN ID idList RIGHT_PAREN");
-	CheckForComments();
+
 	Match(ID);
 	Match(LEFT_PAREN);
 	Match(ID);
-	IDList();
+	ParseIDList();
 	Match(RIGHT_PAREN);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 //	predicate		->	ID LEFT_PAREN parameter parameterList RIGHT_PAREN
-void Parser::Predicate()
+void Parser::ParsePredicate()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "predicate -> ID LEFT_PAREN parameter parameterList RIGHT_PAREN");
-	CheckForComments();
+
 
 	Match(ID);
 	Match(LEFT_PAREN);
-	Parameter();
-	ParameterList();
+	ParseParameter();
+	ParseParameterList();
 	Match(RIGHT_PAREN);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
@@ -326,38 +357,38 @@ void Parser::Predicate()
 //	stringList	-> 	COMMA STRING stringList | lambda
 //	idList  	-> 	COMMA ID idList | lambda
 //	parameter	->	STRING | ID
-void Parser::PredicateList()
+void Parser::ParsePredicateList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "predicateList -> COMMA predicate predicateList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
-	Predicate();
-	PredicateList();
+	ParsePredicate();
+	ParsePredicateList();
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::ParameterList()
+void Parser::ParseParameterList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "parameterList -> COMMA parameter parameterList | lambda");
 
-	CheckForComments();
+
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
-	Parameter();
-	ParameterList();
+	ParseParameter();
+	ParseParameterList();
 
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::Parameter()
+void Parser::ParseParameter()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "STRING | ID");
-	CheckForComments();
+
 	switch (CurrTokenType())
 	{
 		case STRING: Match(STRING);
@@ -369,29 +400,31 @@ void Parser::Parameter()
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::StringList()
+void Parser::ParseStringList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "COMMA STRING stringList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
 	Match(STRING);
-	StringList();
+	ParseStringList();
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::IDList()
+void Parser::ParseIDList()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "idList -> COMMA ID idList | lambda");
-	CheckForComments();
+
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
 	Match(ID);
-	IDList();
+
+	ParseIDList();
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
+
 

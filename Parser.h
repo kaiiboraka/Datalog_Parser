@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DatalogProgram.h"
 #include "Token.h"
 
 using namespace Tokens;
@@ -9,6 +10,7 @@ class Parser
 	static const unsigned int NEXT = 1;
 
 	vector<Token> tokens;
+	DatalogProgram dp;
 
 	unsigned int currTokenIdx, step;
 
@@ -27,6 +29,8 @@ public:
 
 	explicit Parser(const vector<Token>& tokens);
 
+	string PrevTokenString();
+
 	string CurrTokenString();
 
 	string PrintTypeFromTokens(int offset);
@@ -35,11 +39,13 @@ public:
 
 	void AdvanceToken();
 
-	void ThrowError();
+	void ThrowError(bool problem);
 
 	void Match(TokenType expectedType);
 
-	void CheckForComments();
+	[[maybe_unused]] void CheckForComments();
+
+	void RemoveComments();
 
 	void PrintStep();
 
@@ -47,7 +53,7 @@ public:
 
 	void PrintEnd(const string& funcName) const;
 
-	void Run();
+	DatalogProgram Run();
 
 	/*
 	datalogProgram	->	SCHEMES COLON scheme schemeList FACTS COLON factList
@@ -75,34 +81,35 @@ public:
 
 	void DatalogProgram();
 
-	void Scheme();
+	void ParseScheme();
 
-	void IDList();
+	void ParseIDList();
 
-	void SchemeList();
+	void ParseSchemeList();
 
-	void Fact();
+	void ParseFact();
 
-	void StringList();
+	void ParseStringList();
 
-	void FactList();
+	void ParseFactList();
 
-	void Rule();
+	void ParseRule();
 
-	void HeadPredicate();
+	void ParseHeadPredicate();
 
-	void Predicate();
+	void ParsePredicate();
 
-	void Parameter();
+	void ParseParameter();
 
-	void ParameterList();
+	void ParseParameterList();
 
-	void PredicateList();
+	void ParsePredicateList();
 
-	void RuleList();
+	void ParseRuleList();
 
-	void Query();
+	void ParseQuery();
 
-	void QueryList();
+	void ParseQueryList();
+
 
 };

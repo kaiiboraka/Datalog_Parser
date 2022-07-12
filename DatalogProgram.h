@@ -1,21 +1,17 @@
 #pragma once
+
 #include <set>
 #include "Lexer.h"
-#include "Parser.h"
 #include "Output.h"
 #include "Rule.h"
 
 class DatalogProgram
 {
-	Lexer lexer;
-	Parser parser;
-
 	vector<Predicate> schemes;
 	vector<Predicate> facts;
 	vector<Rule> rules;
 	vector<Predicate> queries;
 	set<string> domain;
-
 	vector<TokenType> order =
 		{
 			SCHEMES,
@@ -24,12 +20,8 @@ class DatalogProgram
 			QUERIES,
 			STRING
 		};
-
 public:
 	DatalogProgram() = default;
-
-	vector<Token> LexTokens(const string& input);
-	void TryParse(const vector<Token>& tokens, ostream& os);
 
 	[[nodiscard]] const vector<Predicate>& GetSchemes() const;
 	[[nodiscard]] const vector<Predicate>& GetFacts() const;
