@@ -31,7 +31,7 @@ public:
 		{
 			if (t.size() > 0)
 			{
-				out << t.ToString() << endl;
+				out << t.ToString(header) << endl;
 			}
 		}
 		return out.str();
@@ -88,6 +88,7 @@ public:
 	//pi_{BCD} R
 	Relation Project(vector<unsigned int> colsToKeep)
 	{
+		Relation output;
 		// {3, 2}
 		//set name to something?
 		// create a new header(empty)
@@ -100,7 +101,7 @@ public:
 		// fill with reordered data
 		// (1 2 3 4 5) -> (4, 3)
 		// put that tuple into output relation
-
+		return output;
 	}
 
 };

@@ -53,7 +53,9 @@ Output DatalogProgram::DetermineOutput(const TokenType& type)
 		case QUERIES:
 			return Output(TokenNames[type], queries.size(), GetStrings(queries), Symbols[Q_MARK]);
 		case STRING:
-			return Output(string(NAMEOF(domain)), domain.size(), GetStrings(), Symbols[type], Symbols[type]);
+			return Output("Domain", domain.size(), GetStrings());
+		default:
+			return Output{};
 	}
 
 	return Output();
@@ -62,9 +64,9 @@ Output DatalogProgram::DetermineOutput(const TokenType& type)
 vector<string> DatalogProgram::GetStrings(vector<Predicate> predicates)
 {
 	vector<string> output;
-	for (auto& p : predicates)
+	for (auto& predicate : predicates)
 	{
-		output.push_back(p.ToString());
+		output.push_back(predicate.ToString());
 	}
 	return output;
 }
@@ -72,9 +74,9 @@ vector<string> DatalogProgram::GetStrings(vector<Predicate> predicates)
 vector<string> DatalogProgram::GetStrings(vector<Rule> rules)
 {
 	vector<string> output;
-	for (auto& r : rules)
+	for (auto& rule : rules)
 	{
-		output.push_back(r.ToString());
+		output.push_back(rule.ToString());
 	}
 	return output;
 }
@@ -82,14 +84,15 @@ vector<string> DatalogProgram::GetStrings(vector<Rule> rules)
 vector<string> DatalogProgram::GetStrings()
 {
 	vector<string> output;
-	for (auto& s : domain)
+	for (auto& string : domain)
 	{
-		output.push_back(s);
+		output.push_back(string);
 	}
 	return output;
 }
-
+#ifndef __GNUC__
 #pragma region Getters & Setters
+#endif
 
 const vector<Predicate>& DatalogProgram::GetSchemes() const
 {
@@ -141,8 +144,6 @@ void DatalogProgram::SetDomain(const set<string>& domain)
 	DatalogProgram::domain = domain;
 }
 
-
-
-
+#ifndef __GNUC__
 #pragma endregion
-
+#endif

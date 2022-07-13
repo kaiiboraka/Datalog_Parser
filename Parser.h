@@ -11,6 +11,9 @@ class Parser
 
 	vector<Token> tokens;
 	DatalogProgram dp;
+public:
+	const DatalogProgram& GetDatalogProgram() const;
+private:
 
 	unsigned int currTokenIdx, step;
 
@@ -51,9 +54,9 @@ public:
 
 	void PrintStart(const string& funcName, const string& grammar);
 
-	void PrintEnd(const string& funcName) const;
+	void PrintEnd(const string& funcName) ;
 
-	DatalogProgram Run();
+	DatalogProgram& Run(ostream& os = cout);
 
 	/*
 	datalogProgram	->	SCHEMES COLON scheme schemeList FACTS COLON factList
@@ -79,31 +82,31 @@ public:
 	parameter		->	STRING | ID
  	*/
 
-	void DatalogProgram();
+	void Datalog();
 
 	void ParseScheme();
 
-	void ParseIDList();
+	void ParseIDList(Predicate& currPred);
 
 	void ParseSchemeList();
 
 	void ParseFact();
 
-	void ParseStringList();
+	void ParseStringList(Predicate& currPred);
 
 	void ParseFactList();
 
 	void ParseRule();
 
-	void ParseHeadPredicate();
+	Predicate ParseHeadPredicate();
 
-	void ParsePredicate();
+	Predicate ParsePredicate();
 
-	void ParseParameter();
+	Parameter ParseParameter();
 
-	void ParseParameterList();
+	void ParseParameterList(Predicate& currPred);
 
-	void ParsePredicateList();
+	void ParsePredicateList(Rule& currRule);
 
 	void ParseRuleList();
 
@@ -112,4 +115,5 @@ public:
 	void ParseQueryList();
 
 
+	const string& PrevTokenValue();
 };

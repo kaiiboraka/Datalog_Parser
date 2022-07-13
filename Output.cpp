@@ -6,9 +6,9 @@ ostream& operator << (ostream& out, const Output& self)
 		<< Symbols[LEFT_PAREN] << self.size << Symbols[RIGHT_PAREN]
 		<< Symbols[COLON] << endl;
 
-	for (auto& s : self.output)
+	for (auto& string : self.output)
 	{
-		out << "\t" << self.prefix << s << self.suffix << endl;
+		out << "  " << self.prefix << string << self.suffix << endl;
 	}
 	return out;
 }

@@ -2,66 +2,26 @@
 #include <fstream>
 
 const string ROOT_PATH = "../";
-const string ARGS_PATH = "Project2aPassOffCases/2-80/";
+const string ARGS_PATH_A = "Project2aPassOffCases/2-80/";
+const string ARGS_PATH_B = "Project2bPassOffCases/2-80/";
 const string FILE_PATH = ROOT_PATH + "input.txt";
 
-string TryReadFile(const string& path);
+string TryReadFile(const string& path = FILE_PATH);
 
-string TryReadArgs(const string& argv);
-
-void TryParse(const vector<Token>& tokens, ostream& os = cout);
+string TryReadArgs(const string& argv, char which);
 
 int main(int argc, char* argv[])
 {
 
-//	string input = (argc <= 1) ?
-//				   TryReadFile(FILE_PATH) :
-//				   TryReadArgs(argv[1]);
-//
-//	Lexer l;
-//	auto tokens = l.Run(input);
-//
-//	TryParse(tokens);
+	string input = (argc > 1) ?
+				   TryReadArgs(argv[1], 'b') :
+				   TryReadFile();
 
-	DatalogProgram program;
+	Lexer l;
+	Parser parser(l.Run(input));
 
-	Predicate snapScheme;
-	snapScheme.SetName("snap");
-	snapScheme.AddParameter("S");
-	snapScheme.AddParameter("N");
-	snapScheme.AddParameter("A");
-	snapScheme.AddParameter("P");
-	program.AddScheme(snapScheme);
-
-	Predicate addressScheme;
-	addressScheme.SetName("HasSameAddress");
-	addressScheme.AddParameter("X");
-	addressScheme.AddParameter("Y");
-	program.AddScheme(addressScheme);
-
-	Predicate snapFact;
-	snapFact.SetName("snap");
-	snapFact.AddParameter("\'12345\'");
-	snapFact.AddParameter("\'C.Brown\'");
-	snapFact.AddParameter("\'12 Apple\'");
-	snapFact.AddParameter("\'555-1234\'");
-	program.AddFact(snapFact);
-
-	Rule addressRule;
-	addressRule.SetHead(addressScheme);
-	addressRule.AddPredicate(snapScheme);
-	addressRule.AddPredicate(snapScheme);
-	program.AddRule(addressRule);
-
-	Predicate addressQuery;
-	addressQuery.SetName("HasSameAddress");
-	addressQuery.AddParameter("\'Snoopy\'");
-	addressQuery.AddParameter("Who");
-	program.AddQuery(addressQuery);
-
-	program.AddStringToDomain("12 Apple");
-
-	cout << program.ToString();
+	//DEBUG_MSG(parser.Run().ToString());
+	parser.Run();
 
 	return 0;
 }
@@ -81,29 +41,19 @@ string TryReadFile(const string& path)
 	}
 }
 
-string TryReadArgs(const string& argv)
+string TryReadArgs(const string& argv, char which)
 {
 	ifstream ifs(argv);
-	if (!ifs.is_open()) ifs.open(ARGS_PATH + argv);
+	if (!ifs.is_open())
+	{
+		string path = (which == 'a') ? ARGS_PATH_A : ARGS_PATH_B;
+
+		ifs.open(path + argv);
+	}
+
 	string line, output;
 	while (getline(ifs, line)) output += line + '\n';
+
 	return output;
 }
 
-void TryParse(const vector<Token>& tokens, ostream& os)
-{
-	try
-	{
-		Parser parser = Parser(tokens);
-		parser.Run();
-		os << "Success!" << endl;
-	}
-	catch (Token& errorToken)
-	{
-		os << "Failure!" << endl << "  " << errorToken.ToString() << endl;
-	}
-	catch (const string& errorMsg)
-	{
-		os << "Failure!" << endl << "  " << errorMsg << endl;
-	}
-}

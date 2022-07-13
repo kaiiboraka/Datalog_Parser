@@ -34,7 +34,7 @@ string Rule::ToString() const
 {
 	string sep;
 	stringstream out;
-	out << head.ToString() << SpacedToken(COLON_DASH);
+	out << head.ToString() << Token::SpacedToken(COLON_DASH);
 	for(auto& p : body)
 	{
 		out << sep << p.ToString();

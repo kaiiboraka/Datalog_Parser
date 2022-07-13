@@ -31,6 +31,13 @@ string Parser::PrevTokenString()
 	return tokens.at(currTokenIdx - 1).ToString();
 }
 
+const string& Parser::PrevTokenValue()
+{
+	ThrowError();
+	return tokens.at(currTokenIdx - 1).GetValue();
+}
+
+
 string Parser::CurrTokenString()
 {
 	ThrowError();
@@ -49,9 +56,9 @@ void Parser::Match(TokenType expectedType)
 	DEBUG_MSG(">> " << __FUNCTION__ << "(" << TokenNames[expectedType] << ")");
 	//the cout should be removed for the final project output
 	DEBUG_MSG(setw(11) << "Current -- " << PrintTypeFromTokens());
+	//CheckForComments();
 	if (CurrTokenType() == expectedType)
 	{
-		// TODO: think about what should happen if the Parser matches an expected Token
 		DEBUG_MSG("Matched " << PrintTypeFromTokens() << " with expected " << TokenNames[expectedType]);
 		DEBUG_MSG(CurrTokenString());
 		AdvanceToken();
@@ -63,7 +70,6 @@ void Parser::Match(TokenType expectedType)
 		DEBUG_MSG("Token at index " << currTokenIdx << " was type: " << left << setw(12)
 									<< TokenNames[CurrTokenType()]);
 		DEBUG_MSG(" expected: " << TokenNames[expectedType]);
-		// TODO: think about what should happen if the Parser matches an UN-expected Token
 		ThrowError(true);
 	}
 
@@ -71,11 +77,12 @@ void Parser::Match(TokenType expectedType)
 
 void Parser::RemoveComments()
 {
-	for (int i = 0; i < tokens.size(); ++i)
+	for (unsigned int i = 0; i < tokens.size(); ++i)
 	{
 		if (tokens.at(i).GetType() == COMMENT)
 		{
 			tokens.erase(tokens.begin() + i);
+			i--;
 		}
 	}
 }
@@ -106,15 +113,35 @@ void Parser::PrintStart(const string& funcName, const string& grammar)
 	DEBUG_MSG(grammar << endl);
 }
 
-void Parser::PrintEnd(const string& funcName) const
+void Parser::PrintEnd(const string& funcName)
 {
-	DEBUG_MSG("<<< end " << __FUNCTION__ << "()" << endl);
+	DEBUG_MSG("<<< end " << funcName << "()" << endl);
 }
 
-DatalogProgram Parser::Run()
+
+DatalogProgram& Parser::Run(ostream& os)
 {
-	//TODO: call Start production function. should be datalog program
-	DatalogProgram();
+	try
+	{
+		Datalog();
+		os << "Success!" << endl;
+		os << dp.ToString();
+	}
+	catch (Token& errorToken)
+	{
+		os << "Failure!" << endl
+		<< "  " << errorToken.ToString() << endl;
+	}
+	catch (const string& errorMsg)
+	{
+		os << "Failure!" << endl
+		<< "  " << errorMsg << endl;
+	}
+	return dp;
+}
+
+const DatalogProgram& Parser::GetDatalogProgram() const
+{
 	return dp;
 }
 
@@ -154,7 +181,7 @@ parameter		->	STRING | ID
 
 // datalogProgram -> SCHEMES COLON scheme schemeList FACTS COLON factList
 //					 RULES COLON ruleList QUERIES COLON query queryList EOF
-void Parser::DatalogProgram()
+void Parser::Datalog()
 {
 	if (Debugger::enabled)
 		PrintStart(__FUNCTION__,
@@ -217,8 +244,7 @@ void Parser::ParseFactList()
 {
 	if (Debugger::enabled) PrintStart(__FUNCTION__, "factList -> fact factList | lambda");
 
-	if (CurrTokenType() == steps.at(NEXT + step))
-	{ return; }
+	if (CurrTokenType() == steps.at(NEXT + step)) return;
 
 	ParseFact();
 	ParseFactList();
@@ -228,10 +254,9 @@ void Parser::ParseFactList()
 // ruleList -> rule ruleList | lambda
 void Parser::ParseRuleList()
 {
-	if (Debugger::enabled)PrintStart(__FUNCTION__, "ruleList -> rule ruleList | lambda");
+	if (Debugger::enabled) PrintStart(__FUNCTION__, "ruleList -> rule ruleList | lambda");
 
-	if (CurrTokenType() == steps.at(NEXT + step))
-	{ return; }
+	if (CurrTokenType() == steps.at(NEXT + step)) return;
 
 	ParseRule();
 	ParseRuleList();
@@ -241,10 +266,9 @@ void Parser::ParseRuleList()
 // queryList -> query queryList | lambda
 void Parser::ParseQueryList()
 {
-	if (Debugger::enabled)PrintStart(__FUNCTION__, "queryList -> query queryList | lambda");
+	if (Debugger::enabled) PrintStart(__FUNCTION__, "queryList -> query queryList | lambda");
 
-	if (CurrTokenType() == steps.at(NEXT + step))
-	{ return; }
+	if (CurrTokenType() == steps.at(NEXT + step)) return;
 
 	ParseQuery();
 	ParseQueryList();
@@ -259,20 +283,18 @@ void Parser::ParseQueryList()
 // scheme -> ID LEFT_PAREN ID idList RIGHT_PAREN
 void Parser::ParseScheme()
 {
-	if (Debugger::enabled)PrintStart(__FUNCTION__, "scheme -> ID LEFT_PAREN ID idList RIGHT_PAREN");
+	if (Debugger::enabled) PrintStart(__FUNCTION__, "scheme -> ID LEFT_PAREN ID idList RIGHT_PAREN");
 
 	Predicate newScheme;
 
 	Match(ID);
-	newScheme.SetName(PrevTokenString());
+	newScheme.SetName(PrevTokenValue());
 
 	Match(LEFT_PAREN);
 	Match(ID);
-	newScheme.AddParameter(PrevTokenString());
+	newScheme.AddParameter(PrevTokenValue());
 
-	ParseIDList();
-
-
+	ParseIDList(newScheme);
 
 	Match(RIGHT_PAREN);
 
@@ -286,13 +308,23 @@ void Parser::ParseFact()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "fact -> ID LEFT_PAREN STRING stringList RIGHT_PAREN PERIOD");
 
+	Predicate newFact;
 
 	Match(ID);
+	newFact.SetName(PrevTokenValue());
+
 	Match(LEFT_PAREN);
 	Match(STRING);
-	ParseStringList();
+	newFact.AddParameter(PrevTokenValue());
+	dp.AddStringToDomain(PrevTokenValue());
+
+	ParseStringList(newFact);
+
 	Match(RIGHT_PAREN);
 	Match(PERIOD);
+
+	dp.AddFact(newFact);
+
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
@@ -301,12 +333,18 @@ void Parser::ParseRule()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "rule -> headPredicate COLON_DASH predicate predicateList PERIOD");
 
+	Rule newRule;
 
-	ParseHeadPredicate();
+	newRule.SetHead(ParseHeadPredicate());
+
 	Match(COLON_DASH);
-	ParsePredicate();
-	ParsePredicateList();
+
+	newRule.AddPredicate(ParsePredicate());
+	ParsePredicateList(newRule);
+
 	Match(PERIOD);
+
+	dp.AddRule(newRule);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
@@ -315,8 +353,8 @@ void Parser::ParseQuery()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "query -> predicate Q_MARK");
 
+	dp.AddQuery(ParsePredicate());
 
-	ParsePredicate();
 	Match(Q_MARK);
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
@@ -326,30 +364,44 @@ void Parser::ParseQuery()
 //	predicate		->	ID LEFT_PAREN parameter parameterList RIGHT_PAREN
 
 //	headPredicate	->	ID LEFT_PAREN ID idList RIGHT_PAREN
-void Parser::ParseHeadPredicate()
+Predicate Parser::ParseHeadPredicate()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "headPredicate -> ID LEFT_PAREN ID idList RIGHT_PAREN");
 
+	Predicate head;
+
 	Match(ID);
+	head.SetName(PrevTokenValue());
+
 	Match(LEFT_PAREN);
+
 	Match(ID);
-	ParseIDList();
+	head.AddParameter(PrevTokenValue());
+	ParseIDList(head);
+
 	Match(RIGHT_PAREN);
+
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
+	return head;
 }
 
 //	predicate		->	ID LEFT_PAREN parameter parameterList RIGHT_PAREN
-void Parser::ParsePredicate()
+Predicate Parser::ParsePredicate()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "predicate -> ID LEFT_PAREN parameter parameterList RIGHT_PAREN");
 
+	Predicate newPred;
 
 	Match(ID);
+	newPred.SetName(PrevTokenValue());
+
 	Match(LEFT_PAREN);
-	ParseParameter();
-	ParseParameterList();
+	newPred.AddParameter(ParseParameter());
+	ParseParameterList(newPred);
 	Match(RIGHT_PAREN);
+
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
+	return newPred;
 }
 
 //	predicateList	->	COMMA predicate predicateList | lambda
@@ -357,50 +409,52 @@ void Parser::ParsePredicate()
 //	stringList	-> 	COMMA STRING stringList | lambda
 //	idList  	-> 	COMMA ID idList | lambda
 //	parameter	->	STRING | ID
-void Parser::ParsePredicateList()
+void Parser::ParsePredicateList(Rule& currRule)
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "predicateList -> COMMA predicate predicateList | lambda");
 
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
-	ParsePredicate();
-	ParsePredicateList();
+	currRule.AddPredicate(ParsePredicate());
+	ParsePredicateList(currRule);
+
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::ParseParameterList()
+void Parser::ParseParameterList(Predicate& currPred)
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "parameterList -> COMMA parameter parameterList | lambda");
-
 
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
-	ParseParameter();
-	ParseParameterList();
+	currPred.AddParameter(ParseParameter());
+	ParseParameterList(currPred);
 
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::ParseParameter()
+Parameter Parser::ParseParameter()
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "STRING | ID");
 
 	switch (CurrTokenType())
 	{
 		case STRING: Match(STRING);
-			return;
+			break;
 		case ID: Match(ID);
-			return;
-		default: return;
+			break;
+		default:
+			return Parameter{};
 	}
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
+	return Parameter(PrevTokenValue());
 }
 
-void Parser::ParseStringList()
+void Parser::ParseStringList(Predicate& currPred)
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "COMMA STRING stringList | lambda");
 
@@ -408,12 +462,16 @@ void Parser::ParseStringList()
 
 	Match(COMMA);
 	Match(STRING);
-	ParseStringList();
+
+	currPred.AddParameter(PrevTokenValue());
+	dp.AddStringToDomain(PrevTokenValue());
+
+	ParseStringList(currPred);
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
-void Parser::ParseIDList()
+void Parser::ParseIDList(Predicate& currPred)
 {
 	if (Debugger::enabled)PrintStart(__FUNCTION__, "idList -> COMMA ID idList | lambda");
 
@@ -422,9 +480,14 @@ void Parser::ParseIDList()
 	Match(COMMA);
 	Match(ID);
 
-	ParseIDList();
+	currPred.AddParameter(PrevTokenValue());
+
+	ParseIDList(currPred);
 	// else do nothing, lambda case
 	if (Debugger::enabled) PrintEnd(__FUNCTION__);
 }
 
 
+#ifndef __GNUC__
+#pragma endregion
+#endif

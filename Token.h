@@ -73,11 +73,6 @@ namespace Tokens
 		{TYPE_COUNT,  ""},
 	};
 
-	static string SpacedToken(TokenType token)
-	{
-		return string(" " + Symbols[token] + " ");
-	}
-
 	class Token
 	{
 		TokenType type;
@@ -94,6 +89,11 @@ namespace Tokens
 		Token(const string& newValue, const TokenType& newType = UNDEFINED, const unsigned int& newLine = 0)
 				: type(newType), value(newValue), line(newLine)
 		{}
+
+		static string SpacedToken(const TokenType& token)
+		{
+			return string(" " + Symbols[token] + " ");
+		}
 
 		const string& GetValue() const
 		{
