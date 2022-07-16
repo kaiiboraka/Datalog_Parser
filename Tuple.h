@@ -2,20 +2,25 @@
 
 #include "Helper.h"
 #include "Header.h"
+typedef vector<string> Values;
 
 class Tuple
 {
-	vector<string> values;
+	Values values;
 
 public:
 	Tuple()
 	{}
 
-	Tuple(vector<string> values) : values(values)
+	Tuple(const Values& values) : values(values)
 	{}
 
 	string ToString(Header header)
 	{
+		if (size() != header.size())
+		{
+			throw "sizes do not match";
+		}
 		stringstream out;
 		string sep = "";
 		for (unsigned i = 0; i < size(); i++)
@@ -35,6 +40,8 @@ public:
 
 	string at(unsigned int index)
 	{
+		Helper::CheckBounds(index, values);
+
 		return values.at(index);
 	}
 
@@ -48,6 +55,18 @@ public:
 	{
 		return values < t.values;
 	}
+
+	const vector<string>& GetValues() const
+	{
+		return values;
+	}
+
+	void SetValues(const vector<string>& values)
+	{
+		Tuple::values = values;
+	}
+
+
 
 	// TODO: add more delegation functions as needed
 

@@ -340,6 +340,7 @@ void Parser::ParseRule()
 	Match(COLON_DASH);
 
 	newRule.AddPredicate(ParsePredicate());
+
 	ParsePredicateList(newRule);
 
 	Match(PERIOD);
@@ -416,6 +417,7 @@ void Parser::ParsePredicateList(Rule& currRule)
 	if (CurrTokenType() != COMMA) return;
 
 	Match(COMMA);
+
 	currRule.AddPredicate(ParsePredicate());
 	ParsePredicateList(currRule);
 

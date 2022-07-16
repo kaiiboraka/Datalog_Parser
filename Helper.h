@@ -36,6 +36,12 @@ public:
 		return buffer.str();
 	}
 
+	template<class T>
+	static void CheckBounds(unsigned int index, const vector<T> container)
+	{
+		if (index >= container.size()) throw out_of_range("Index out of bounds.");
+	}
+
 
 	template<class T>
 	static void Test(const string& message, T const& expected, T const& observed)
@@ -60,6 +66,23 @@ public:
 		{
 			cerr << e.what() << endl;
 		}
+	}
+
+	static void ToLower(string& basicString)
+	{
+		for(auto& c : basicString)
+		{
+			c = char(tolower(c));
+		}
+	}
+	static string GetLower(const string& basicString)
+	{
+		string output;
+		for(auto& c : basicString)
+		{
+			output += char(tolower(c));
+		}
+		return output;
 	}
 };
 

@@ -1,32 +1,43 @@
 #pragma once
 
 #include "Helper.h"
+typedef vector<string> ColumnNames;
+typedef vector<unsigned int> ColumnNums;
 
 class Header
 {
-	vector<string> attributes;
-
+	ColumnNames columns;
 public:
-	Header()
+	Header() = default;
+
+	Header(const ColumnNames& newColumns) : columns(newColumns)
 	{}
 
-	Header(vector<string> attributes) : attributes(attributes)
-	{}
+	const ColumnNames& GetColumns() const
+	{
+		return columns;
+	}
+
+	void SetColumns(const ColumnNames& newColumns)
+	{
+		Header::columns = newColumns;
+	}
 
 // Header :
 	unsigned int size()
 	{
-		return attributes.size();
+		return columns.size();
 	}
 
 	string& at(unsigned int index)
 	{
-		return attributes.at(index);
+		Helper::CheckBounds(index, columns);
+		return columns.at(index);
 	}
 
 	void push_back(string value)
 	{
-		attributes.push_back(value);
+		columns.push_back(value);
 	}
 
 };
