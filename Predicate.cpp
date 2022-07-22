@@ -5,9 +5,24 @@ const string& Predicate::GetName() const
 	return name;
 }
 
-const vector<Parameter>& Predicate::GetParameters() const
+Values Predicate::GetParameters() const
 {
-	return parameters;
+	Values values;
+	for (const Parameter& p : parameters)
+	{
+		values.push_back(string(p));
+	}
+	return values;
+}
+
+Tuple Predicate::GetParametersAsTuple()
+{
+	Values values;
+	for (const Parameter& p : parameters)
+	{
+		values.push_back(string(p));
+	}
+	return Tuple{values};
 }
 
 void Predicate::SetName(const string& newName)
@@ -15,7 +30,7 @@ void Predicate::SetName(const string& newName)
 	name = newName;
 }
 
-void Predicate::SetParameters(const vector<Parameter>& newParameters)
+void Predicate::SetParameters(const Parameters& newParameters)
 {
 	parameters = newParameters;
 }

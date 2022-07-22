@@ -2,7 +2,7 @@
 
 #include "Helper.h"
 #include "Header.h"
-typedef vector<string> Values;
+
 
 class Tuple
 {
@@ -56,14 +56,14 @@ public:
 		return values < t.values;
 	}
 
-	const vector<string>& GetValues() const
+	const Values& GetValues() const
 	{
 		return values;
 	}
 
-	void SetValues(const vector<string>& values)
+	void SetValues(const Values& values)
 	{
-		Tuple::values = values;
+		this->values = values;
 	}
 
 

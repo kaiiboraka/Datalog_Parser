@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Helper.h"
+#include "Predicate.h"
+
+typedef vector<string> Values;
 typedef vector<string> ColumnNames;
 typedef vector<unsigned int> ColumnNums;
 
@@ -9,9 +12,15 @@ class Header
 	ColumnNames columns;
 public:
 	Header() = default;
-
 	Header(const ColumnNames& newColumns) : columns(newColumns)
 	{}
+//	Header(const Parameters& newColumns)
+//	{
+//		for (auto& p : newColumns)
+//		{
+//			columns.push_back(string(p));
+//		}
+//	}
 
 	const ColumnNames& GetColumns() const
 	{

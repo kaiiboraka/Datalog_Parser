@@ -5,59 +5,30 @@
 #ifndef MAIN_CPP_INTERPRETER_H
 #define MAIN_CPP_INTERPRETER_H
 #include "DatalogProgram.h"
-#include "Relation.h" // will be in database
+#include "Relation.h" // will be in db
+#include "Database.h"
 
 class Interpreter
 {
-	DatalogProgram dp;
+	DatalogProgram datalogProgram;
 	// Database (Project 3) {map<string, relation*>}
+	Database database;
+	set<Relation*> relations;
 
 public:
-	Interpreter(DatalogProgram dp) : dp(dp)
+	Interpreter(const DatalogProgram& dp) : datalogProgram(dp)
 	{
 
 	}
 
-	void Run()
-	{
-		EvaluateSchemes();
-		EvaluateFacts();
-		//evalRules(); // Project 4
-		EvaluateQueries();
-	}
+	void Run();
 
-	void EvaluateSchemes()
-	{
-		//defines a new table in our database
-		//SNAP(A, B, C, D);
-			// name: snap
-			// header: {A, B, C, D}
-	}
-	void EvaluateFacts()
-	{
-		//adds a row to an existing table
-		//SNAP('1','2','3','4')
-			// add tuple ('1','2','3','4')
-			// to the SNAP table
-	}
-	void EvaluateRules()
-	{
+	void EvaluateSchemes();
+	void EvaluateFacts();
+	void EvaluateRules();
+	void EvaluateQueries();
 
-	}
-	void EvaluateQueries()
-	{
-		for(auto& query : dp.GetQueries())
-		{
-			EvaluatePredicate(query);
-		}
-	}
-
-	Relation* EvaluatePredicate(Predicate p)
-	{
-		//SNAP('1', A, A, B)
-		//select(0, '1')
-		//select(1, 2)
-	}
+	Relation* EvaluatePredicate(const Predicate& p);
 };
 
 

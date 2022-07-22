@@ -23,34 +23,6 @@ int main(int argc, char* argv[])
 //	//DEBUG_MSG(parser.Run().ToString());
 //	parser.Run();
 
-	Tuple t1;
-	t1.push_back("A");
-	t1.push_back("B");
-	t1.push_back("C");
-
-	Tuple t2;
-	t2.push_back("1");
-	t2.push_back("2");
-	t2.push_back("1");
-
-	Header h1;
-	h1.push_back("col0");
-	h1.push_back("col1");
-	h1.push_back("col2");
-
-
-	ColumnNums colsToKeep;
-	colsToKeep.push_back(2);
-	colsToKeep.push_back(0);
-
-
-	Relation r1;
-	r1.SetName("first");
-	r1.SetHeader(h1);
-	r1.AddTuple(t1);
-	r1.AddTuple(t2);
-
-	cout << r1.Project(colsToKeep)->ToString() << endl;
 
 	return 0;
 }

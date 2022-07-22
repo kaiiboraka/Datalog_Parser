@@ -61,7 +61,7 @@ Output DatalogProgram::DetermineOutput(const TokenType& type)
 	return Output();
 }
 
-vector<string> DatalogProgram::GetStrings(vector<Predicate> predicates)
+vector<string> DatalogProgram::GetStrings(Predicates predicates)
 {
 	vector<string> output;
 	for (auto& predicate : predicates)
@@ -71,7 +71,7 @@ vector<string> DatalogProgram::GetStrings(vector<Predicate> predicates)
 	return output;
 }
 
-vector<string> DatalogProgram::GetStrings(vector<Rule> rules)
+vector<string> DatalogProgram::GetStrings(Rules rules)
 {
 	vector<string> output;
 	for (auto& rule : rules)
@@ -94,22 +94,22 @@ vector<string> DatalogProgram::GetStrings()
 #pragma region Getters & Setters
 #endif
 
-const vector<Predicate>& DatalogProgram::GetSchemes() const
+const Predicates& DatalogProgram::GetSchemes() const
 {
 	return schemes;
 }
 
-const vector<Predicate>& DatalogProgram::GetFacts() const
+const Predicates& DatalogProgram::GetFacts() const
 {
 	return facts;
 }
 
-const vector<Rule>& DatalogProgram::GetRules() const
+const Rules& DatalogProgram::GetRules() const
 {
 	return rules;
 }
 
-const vector<Predicate>& DatalogProgram::GetQueries() const
+const Predicates& DatalogProgram::GetQueries() const
 {
 	return queries;
 }
@@ -119,22 +119,22 @@ const set<string>& DatalogProgram::GetDomain() const
 	return domain;
 }
 
-void DatalogProgram::SetSchemes(const vector<Predicate>& schemes)
+void DatalogProgram::SetSchemes(const Predicates& schemes)
 {
 	DatalogProgram::schemes = schemes;
 }
 
-void DatalogProgram::SetFacts(const vector<Predicate>& facts)
+void DatalogProgram::SetFacts(const Predicates& facts)
 {
 	DatalogProgram::facts = facts;
 }
 
-void DatalogProgram::SetRules(const vector<Rule>& rules)
+void DatalogProgram::SetRules(const Rules& rules)
 {
 	DatalogProgram::rules = rules;
 }
 
-void DatalogProgram::SetQueries(const vector<Predicate>& queries)
+void DatalogProgram::SetQueries(const Predicates& queries)
 {
 	DatalogProgram::queries = queries;
 }

@@ -4,13 +4,14 @@
 #include "Lexer.h"
 #include "Output.h"
 #include "Rule.h"
-
+typedef vector<Predicate> Predicates;
+typedef vector<Rule> Rules;
 class DatalogProgram
 {
-	vector<Predicate> schemes;
-	vector<Predicate> facts;
-	vector<Rule> rules;
-	vector<Predicate> queries;
+	Predicates schemes;
+	Predicates facts;
+	Rules rules;
+	Predicates queries;
 	set<string> domain;
 	vector<TokenType> order =
 		{
@@ -23,16 +24,16 @@ class DatalogProgram
 public:
 	DatalogProgram() = default;
 
-	[[nodiscard]] const vector<Predicate>& GetSchemes() const;
-	[[nodiscard]] const vector<Predicate>& GetFacts() const;
-	[[nodiscard]] const vector<Rule>& GetRules() const;
-	[[nodiscard]] const vector<Predicate>& GetQueries() const;
+	[[nodiscard]] const Predicates& GetSchemes() const;
+	[[nodiscard]] const Predicates& GetFacts() const;
+	[[nodiscard]] const Rules& GetRules() const;
+	[[nodiscard]] const Predicates& GetQueries() const;
 	[[nodiscard]] const set<string>& GetDomain() const;
 
-	void SetSchemes(const vector<Predicate>& schemes);
-	void SetFacts(const vector<Predicate>& facts);
-	void SetRules(const vector<Rule>& rules);
-	void SetQueries(const vector<Predicate>& queries);
+	void SetSchemes(const Predicates& schemes);
+	void SetFacts(const Predicates& facts);
+	void SetRules(const Rules& rules);
+	void SetQueries(const Predicates& queries);
 	void SetDomain(const set<string>& domain);
 
 	void AddScheme(const Predicate& scheme);
@@ -44,8 +45,8 @@ public:
 	string ToString();
 
 	void PrintTokens(ostream& out, const vector<TokenType>& types);
-	vector<string> GetStrings(vector<Predicate> predicates);
-	vector<string> GetStrings(vector<Rule> rules);
+	vector<string> GetStrings(Predicates predicates);
+	vector<string> GetStrings(Rules rules);
 	vector<string> GetStrings();
 	Output DetermineOutput(const TokenType& type);
 };

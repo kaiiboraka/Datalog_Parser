@@ -15,7 +15,7 @@ public:
 	explicit Relation(const string& newName);
 	Relation(const Relation* other, const string& instruction = "");
 	Relation(const Relation* other, const Header& newHeader);
-	Relation(const string& newName, const Header& newHeader, const Tuples& newTuples);
+	Relation(const string& newName, const Header& newHeader, const Tuples& newTuples = {});
 
 	Relation* Select(unsigned int colIdx, const string& expectedValue);
 
