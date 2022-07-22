@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Helper.h"
 #include "Header.h"
-
 
 class Tuple
 {

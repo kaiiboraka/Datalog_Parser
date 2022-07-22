@@ -5,7 +5,7 @@ const string& Predicate::GetName() const
 	return name;
 }
 
-Values Predicate::GetParameters() const
+Values Predicate::GetParameterValues() const
 {
 	Values values;
 	for (const Parameter& p : parameters)
@@ -57,4 +57,9 @@ string Predicate::ToString() const
 	}
 	out << Symbols[RIGHT_PAREN];
 	return out.str();
+}
+
+const Parameters& Predicate::GetParameters() const
+{
+	return parameters;
 }

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Parameter.h"
 #include "Tuple.h"
-
-typedef vector<Parameter> Parameters;
 
 class Predicate
 {
@@ -13,12 +10,13 @@ class Predicate
 public:
 	Predicate() = default;
 
-	Predicate(vector<Parameter>& parameters, const string& name = "")
+	Predicate(Parameters& parameters, const string& name = "")
 		: name(name), parameters(parameters)
 	{}
 
 	[[nodiscard]] const string& GetName() const;
-	Values GetParameters() const;
+	[[nodiscard]] const Parameters& GetParameters() const;
+	[[nodiscard]] Values GetParameterValues() const;
 	Tuple GetParametersAsTuple();
 
 	void SetName(const string& newName);
@@ -34,7 +32,7 @@ public:
 		Parameters p;
 		for (auto& s : other)
 		{
-			p.push_back(s);
+			p.push_back(Parameter{s});
 		}
 		return Predicate{p};
 	}
@@ -51,5 +49,6 @@ public:
 	{
 		return name;
 	}
+
 };
 

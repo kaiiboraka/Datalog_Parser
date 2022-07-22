@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Helper.h"
-#include "Predicate.h"
 
+#include "Parameter.h"
+
+typedef vector<Parameter> Parameters;
 typedef vector<string> Values;
 typedef vector<string> ColumnNames;
 typedef vector<unsigned int> ColumnNums;

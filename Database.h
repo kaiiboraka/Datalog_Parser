@@ -1,9 +1,4 @@
-//
-// Created by Brandon on 7/19/2022.
-//
-
-#ifndef MAIN_CPP_DATABASE_H
-#define MAIN_CPP_DATABASE_H
+#pragma once
 #include "Helper.h"
 #include "Relation.h"
 typedef map<string, Relation> DatabaseMap;
@@ -23,6 +18,3 @@ public:
 		databaseMap.insert({r.GetName(), r});
 	}
 };
-
-
-#endif //MAIN_CPP_DATABASE_H

@@ -28,7 +28,7 @@ public:
 	void EvaluateRules();
 	void EvaluateQueries();
 
-	Relation* EvaluatePredicate(const Predicate& p);
+	Relation* EvaluatePredicate(const Predicate& query);
 };
 
 

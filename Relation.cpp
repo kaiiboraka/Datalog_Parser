@@ -6,23 +6,28 @@ Relation::Relation(const string& newName) : name(newName)
 }
 
 
-Relation::Relation(const Relation* other, const string& which)
+Relation::Relation(const Relation* other, const string& which) : name(other->name)
 {
 	string instruction = Helper::GetLower(which);
 
-	if (instruction == "select")
+	if (instruction.empty())
 	{
-		name = "SELECT(" + other->GetName() + ")";
-		header = other->GetHeader();
+		this->header = other->header;
+		this->tuples = other->tuples;
 	}
-	if (instruction == "project")
+	else if (instruction == "select")
+	{
+		name = "SELECT(" + other->name + ")";
+		header = other->header;
+	}
+	else if (instruction == "project")
 	{
 		name = "PROJECT(" + name + ")";
 	}
 }
 
 Relation::Relation(const Relation* other, const Header& newHeader)
-	: name(other->GetName()), header(newHeader), tuples(other->GetTuples())
+	: name(other->name), header(newHeader), tuples(other->tuples)
 {
 
 }

@@ -20,7 +20,9 @@ void Interpreter::EvaluateSchemes()
 	// header: {A, B, C, D}
 	for (auto& scheme : datalogProgram.GetSchemes())
 	{
-		database.AddRelation(Relation{scheme, Header(scheme.GetParameters())});
+		auto* newRelation = new Relation{scheme, Header(scheme.GetParameterValues())};
+		database.AddRelation(*newRelation);
+		relations.insert(newRelation);
 	}
 }
 
@@ -50,14 +52,26 @@ void Interpreter::EvaluateQueries()
 {
 	for (auto& query : datalogProgram.GetQueries())
 	{
-		EvaluatePredicate(query);
+		relations.insert(EvaluatePredicate(query));
 	}
 }
 
-Relation* Interpreter::EvaluatePredicate(const Predicate& p)
+Relation* Interpreter::EvaluatePredicate(const Predicate& query)
 {
 	//SNAP('1', A, A, B)
 	//select(0, '1')
 	//select(1, 2)
+	//dbm[queryPredicate]
+	auto* queryTable = &database.GetDB()[query];
+	auto& pList = query.GetParameters();
+	Relation* result;
 
+	for (int i = 0; i < pList.size(); i++)
+	{
+		if (pList.at(i).isConstant())
+		{
+			result = queryTable->Select(i, pList.at(i));
+		}
+	}
+	return result;
 }
