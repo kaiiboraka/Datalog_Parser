@@ -8,16 +8,19 @@ class Lexer
 	vector<string> lines;
 	vector<Token> tokens;
 
+	string input;
+
 	void InitializeAutomata();
 
 public:
-	Lexer()
+	Lexer(const string & input = "") : input(input)
 	{
 		InitializeAutomata();
 	}
 
 	[[nodiscard]] const vector<Token>& GetTokens() const;
 
+	vector<Token> Run();
 	vector<Token> Run(const string& outsideInput);
 
 	void PrintTokensList();

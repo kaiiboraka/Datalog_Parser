@@ -10,7 +10,7 @@
 #include <iomanip>
 
 #include "Debugger.h"
-
+typedef unsigned int Index;
 using namespace std;
 
 class Helper
@@ -37,7 +37,7 @@ public:
 	}
 
 	template<class T>
-	static void CheckBounds(unsigned int index, const vector<T> container)
+	static void CheckBounds(Index index, const vector<T> container)
 	{
 		if (index >= container.size()) throw out_of_range("Index out of bounds.");
 	}

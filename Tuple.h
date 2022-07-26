@@ -21,12 +21,12 @@ public:
 		}
 		stringstream out;
 		string sep = "";
-		for (unsigned i = 0; i < size(); i++)
+		for (Index i = 0; i < size(); i++)
 		{
 			string name = header.at(i);
 			string value = at(i);
 			out << sep << name << "=" << value;
-			sep = ",";
+			sep = ", ";
 		}
 		return out.str();
 	}
@@ -36,7 +36,7 @@ public:
 		return values.size();
 	}
 
-	string at(unsigned int index)
+	string at(Index index)
 	{
 		Helper::CheckBounds(index, values);
 
@@ -64,8 +64,8 @@ public:
 		this->values = values;
 	}
 
-
-
-	// TODO: add more delegation functions as needed
-
+	bool empty()
+	{
+		return values.empty();
+	}
 };

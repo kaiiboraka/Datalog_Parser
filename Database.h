@@ -8,6 +8,11 @@ class Database
 public:
 	Database() = default;
 
+	Relation GetRelation(const string& query)
+	{
+		return databaseMap[query];
+	}
+
 	DatabaseMap& GetDB()
 	{
 		return databaseMap;

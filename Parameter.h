@@ -10,7 +10,7 @@ class Parameter
 	bool constant;
 public:
 	Parameter() = default;
-	Parameter(const string& value) : value(value)
+	explicit Parameter(const string& value) : value(value)
 	{
 		constant = IsConstant(value);
 	}

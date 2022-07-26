@@ -7,7 +7,7 @@ using namespace Tokens;
 
 class Parser
 {
-	static const unsigned int NEXT = 1;
+	static const Index NEXT = 1;
 
 	vector<Token> tokens;
 	DatalogProgram dp;
@@ -15,7 +15,7 @@ public:
 	const DatalogProgram& GetDatalogProgram() const;
 private:
 
-	unsigned int currTokenIdx, step;
+	Index currTokenIdx, step;
 
 	vector<TokenType> steps =
 		{

@@ -10,6 +10,8 @@ void Interpreter::Run()
 	EvaluateFacts();
 	//evalRules(); // Project 4
 	EvaluateQueries();
+
+	Clear();
 }
 
 void Interpreter::EvaluateSchemes()
@@ -20,9 +22,10 @@ void Interpreter::EvaluateSchemes()
 	// header: {A, B, C, D}
 	for (auto& scheme : datalogProgram.GetSchemes())
 	{
-		auto* newRelation = new Relation{scheme, Header(scheme.GetParameterValues())};
-		database.AddRelation(*newRelation);
-		relations.insert(newRelation);
+//		auto* newRelation = new Relation{scheme, Header(scheme.GetParameterValues())};
+//		database.AddRelation(*newRelation);
+//		relations.insert(newRelation);
+		database.AddRelation({scheme, Header(scheme.GetParameterValues())});
 	}
 }
 
@@ -32,12 +35,12 @@ void Interpreter::EvaluateFacts()
 	//SNAP('1','2','3','4')
 	// add tuple ('1','2','3','4')
 	// to the SNAP table
+	DatabaseMap & dbm = database.GetDB();
 	for (Predicate fact : datalogProgram.GetFacts())
 	{
-		DatabaseMap & dbm = database.GetDB();
-		for (pair<string, Relation> relation : dbm)
+		for (pair<string, Relation> table : dbm)
 		{
-			if (fact != relation.first) continue; // else, if same
+			if (fact != table.first) continue; // else, if same
 			dbm[fact].AddTuple(fact.GetParametersAsTuple());
 		}
 	}
@@ -50,28 +53,84 @@ void Interpreter::EvaluateRules()
 
 void Interpreter::EvaluateQueries()
 {
-	for (auto& query : datalogProgram.GetQueries())
+//	cout << "Query Evaluation" << endl;
+	auto& DLqueries = datalogProgram.GetQueries();
+	for (auto& queryString : DLqueries)
 	{
-		relations.insert(EvaluatePredicate(query));
+		auto* query = new Relation(EvaluatePredicate(queryString));
+		queries.push_back(query);
+	}
+	PrintQueries();
+}
+
+Relation Interpreter::EvaluatePredicate(const Predicate& query)
+{
+	auto& parameters = query.GetParameters();
+	Relation result(database.GetRelation(query));
+	map<string, Index> seenVars;
+	ColumnNums colsToProject;
+	ColumnNames newColumnNames;
+	for (Index i = 0; i < parameters.size(); i++)
+	{
+		auto& currParam = parameters.at(i);
+		DEBUG_MSG("\nResult size: "<<result.size());
+		DEBUG_MSG("i: " << i);
+		DEBUG_MSG("p: " << currParam.ToString());
+		if (currParam.isConstant())
+		{
+			DEBUG_MSG("STRING");
+			result = result.Select(i, currParam);
+			DEBUG_MSG("After Select 1 - Result size: " << result.size()<<endl << result.ToString());
+		}
+		else
+		{
+			DEBUG_MSG("ID");
+			// not seen already
+			if(seenVars.find(currParam) == seenVars.end())
+			{
+				DEBUG_MSG("Never seen before");
+				seenVars.insert({currParam, i});
+				DEBUG_MSG("seenVars size: " << seenVars.size());
+				colsToProject.push_back(i);
+				DEBUG_MSG("colsToProject size: " << seenVars.size());
+				newColumnNames.push_back(currParam);
+				DEBUG_MSG("newColumnNames size: " << seenVars.size());
+			}
+			else // if seen already
+			{
+				DEBUG_MSG("Seen before");
+				result = result.Select(seenVars[currParam], i);
+				DEBUG_MSG("After Select 2 - Result size: "<<result.size());
+			}
+		}
+	}
+	result = result.Project(colsToProject);
+
+	result = result.Rename(newColumnNames);
+
+	return result;
+}
+
+void Interpreter::PrintQueries(ostream& out)
+{
+	Index i = 0;
+	for(auto& query : queries)
+	{
+		out << datalogProgram.GetQueries()[i++].ToString() << "? ";
+		string output = "No\n";
+		if(!query->empty())
+		{
+			output = "Yes(" + to_string(query->size()) + ")\n";
+			output += query->ToString();
+		}
+		out << output;
 	}
 }
 
-Relation* Interpreter::EvaluatePredicate(const Predicate& query)
+void Interpreter::Clear()
 {
-	//SNAP('1', A, A, B)
-	//select(0, '1')
-	//select(1, 2)
-	//dbm[queryPredicate]
-	auto* queryTable = &database.GetDB()[query];
-	auto& pList = query.GetParameters();
-	Relation* result;
-
-	for (int i = 0; i < pList.size(); i++)
+	for (auto& q : queries)
 	{
-		if (pList.at(i).isConstant())
-		{
-			result = queryTable->Select(i, pList.at(i));
-		}
+		delete q;
 	}
-	return result;
 }

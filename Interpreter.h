@@ -7,13 +7,12 @@
 #include "DatalogProgram.h"
 #include "Relation.h" // will be in db
 #include "Database.h"
-
 class Interpreter
 {
 	DatalogProgram datalogProgram;
 	// Database (Project 3) {map<string, relation*>}
 	Database database;
-	set<Relation*> relations;
+	vector<Relation*> queries;
 
 public:
 	Interpreter(const DatalogProgram& dp) : datalogProgram(dp)
@@ -28,7 +27,9 @@ public:
 	void EvaluateRules();
 	void EvaluateQueries();
 
-	Relation* EvaluatePredicate(const Predicate& query);
+	Relation EvaluatePredicate(const Predicate& query);
+	void PrintQueries(ostream& out = cout);
+	void Clear();
 };
 
 

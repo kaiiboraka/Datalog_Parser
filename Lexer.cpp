@@ -29,6 +29,22 @@ const vector<Token>& Lexer::GetTokens() const
 	return tokens;
 }
 
+vector<Token> Lexer::Run()
+{
+	string reducedInput = input;
+	unsigned int line = 1;
+	while (!reducedInput.empty())
+	{
+		RunAutomata(reducedInput, line);
+	}
+
+	AddToken(Token(Symbols.at(END_OF_FILE), END_OF_FILE, line));
+
+//	if (Debugger::enabled)		PrintTokensList();
+
+	return tokens;
+}
+
 vector<Token> Lexer::Run(const string& outsideInput)
 {
 	string reducedInput = outsideInput;
@@ -40,10 +56,10 @@ vector<Token> Lexer::Run(const string& outsideInput)
 
 	AddToken(Token(Symbols.at(END_OF_FILE), END_OF_FILE, line));
 
-	if (Debugger::enabled)
-	{
-		PrintTokensList();
-	}
+//	if (Debugger::enabled)
+//	{
+//		PrintTokensList();
+//	}
 
 	return tokens;
 }
@@ -51,7 +67,7 @@ vector<Token> Lexer::Run(const string& outsideInput)
 void Lexer::PrintTokensList()
 {
 	ofstream ofs("../tokens.txt");
-	for(unsigned int i = 0; i < tokens.size(); i++)
+	for(Index i = 0; i < tokens.size(); i++)
 	{
 		ofs << right << setw(4) << i << ": ";
 		PrintToken(ofs, tokens.at(i));
@@ -86,7 +102,7 @@ void Lexer::RunAutomata(string& input, unsigned int& lineNum)
 		return;
 	}
 	AddToken(Token(substr, maxAutomaton->GetType(), lineNum));
-	lineNum += maxAutomaton->GetNewLines();
+	lineNum += maxAutomaton->GetNewLinesRead();
 
 	input = input.substr(maxRead, input.size());
 
@@ -95,8 +111,6 @@ void Lexer::RunAutomata(string& input, unsigned int& lineNum)
 void
 Lexer::CompareResults(const string& input, Automaton* currentAutomaton, Automaton*& maxAutomaton, unsigned int& maxRead)
 {
-	string result;
-
 	unsigned int read = currentAutomaton->Run(input);
 	//read == number of actual character symbols gone through,
 	//automatically prioritizing longer FSAs more than shorter ones

@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "Relation.h"
+#include "Interpreter.h"
 #include <fstream>
 
 const string ROOT_PATH = "../";
@@ -11,18 +12,15 @@ string TryReadFile(const string& path = FILE_PATH);
 
 string TryReadArgs(const string& argv, char which);
 
+void RunInterpreter(const string & input);
+
 int main(int argc, char* argv[])
 {
-//	string input = (argc > 1) ?
-//				   TryReadArgs(argv[1], 'b') :
-//				   TryReadFile();
-//
-//	Lexer l;
-//	Parser parser(l.Run(input));
-//
-//	//DEBUG_MSG(parser.Run().ToString());
-//	parser.Run();
+	string input = (argc > 1) ?
+				   TryReadArgs(argv[1], 'b') :
+				   TryReadFile();
 
+	RunInterpreter(input);
 
 	return 0;
 }
@@ -54,5 +52,15 @@ string TryReadArgs(const string& argv, char which)
 	while (getline(ifs, line)) output += line + '\n';
 
 	return output;
+}
+
+void RunInterpreter(const string & input)
+{
+	//	Lexer l(input);
+	//	Parser p(l.Run());
+	//	Interpreter i(p.Run());
+	Interpreter interpreter(Parser(Lexer(input).Run()).Run());
+
+	interpreter.Run();
 }
 

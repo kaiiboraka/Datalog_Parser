@@ -6,7 +6,7 @@ class Automaton
 {
 protected:
 	// This tracks where in the input we are
-	unsigned int currCharIndex = 0;
+	Index currCharIndex = 0;
 
 	// This tracks the number of newLines we have read
 	unsigned int newLinesRead = 0;
@@ -95,7 +95,7 @@ public:
 		return numCharRead;
 	}
 
-	unsigned int GetNewLines() const
+	unsigned int GetNewLinesRead() const
 	{
 		return newLinesRead;
 	}

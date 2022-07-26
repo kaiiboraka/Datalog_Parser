@@ -6,7 +6,8 @@ Relation::Relation(const string& newName) : name(newName)
 }
 
 
-Relation::Relation(const Relation* other, const string& which) : name(other->name)
+Relation::Relation(const Relation* other, const string& which) :
+	name(other->name)
 {
 	string instruction = Helper::GetLower(which);
 
@@ -26,50 +27,58 @@ Relation::Relation(const Relation* other, const string& which) : name(other->nam
 	}
 }
 
-Relation::Relation(const Relation* other, const Header& newHeader)
-	: name(other->name), header(newHeader), tuples(other->tuples)
+Relation::Relation(const Relation* other, const Header& newHeader) :
+	name(other->name),
+	header(newHeader),
+	tuples(other->tuples)
 {
 
 }
 
-Relation::Relation(const string& newName, const Header& newHeader, const Tuples& newTuples)
-	: name(newName), header(newHeader), tuples(newTuples)
+Relation::Relation(const string& newName, const Header& newHeader,
+				   const Tuples& newTuples) :
+	name(newName),
+	header(newHeader),
+	tuples(newTuples)
 {
 
 }
 
-Relation* Relation::Select(unsigned int colIdx, const string& expectedValue)
+Relation Relation::Select(unsigned int colIdx, const string& expectedValue)
 {
 	Helper::CheckBounds(colIdx, header.GetColumns());
 	//	output.SetHeader(this->header);
 	//	output.SetName("SELECT(" + this->name + ")");
-	Relation* output = new Relation(this, "select");
+//	Relation output(this, "select");
+	Relation output(name, header);
 
 	for (Tuple t : tuples)
 	{
 		if (t.at(colIdx) == expectedValue)
 		{
-			output->AddTuple(t);
+			output.AddTuple(t);
 		}
 	}
+	DEBUG_MSG("Select 1:" << endl << output.ToString());
 	return output;
 }
 
-Relation* Relation::Select(unsigned int col1, unsigned int col2)
+Relation Relation::Select(unsigned int col1, unsigned int col2)
 {
 	Helper::CheckBounds(col1, header.GetColumns());
 	Helper::CheckBounds(col2, header.GetColumns());
 	//	output.SetHeader(this->header);
 	//	output.SetName("SELECT(" + this->name + ")");
-	Relation* output = new Relation(this, "select");
-
+	//Relation output(this, "select");
+	Relation output(name, header);
 	for (Tuple t : tuples)
 	{
 		if (t.at(col1) == t.at(col2))
 		{
-			output->AddTuple(t);
+			output.AddTuple(t);
 		}
 	}
+	DEBUG_MSG("Select 2:" << endl << output.ToString());
 	return output;
 }
 
@@ -86,17 +95,12 @@ Relation* Relation::Select(unsigned int col1, unsigned int col2)
 
 	return output;
 */
-Relation* Relation::Rename(unsigned int colToRename, const string& newName)
+Relation Relation::Rename(unsigned int colToRename, const string& newName)
 {
 	Header newHeader = header;
 	newHeader.at(colToRename) = newName;
 
-	return new Relation(this, newHeader);
-}
-
-Relation* Relation::Rename(const ColumnNames& newColumns)
-{
-	return new Relation(this, Header(newColumns));
+	return Relation{this, newHeader};
 }
 
 /*
@@ -128,7 +132,7 @@ Relation* Relation::Rename(const ColumnNames& newColumns)
 	 add newTuple into output relation
 	 (1 2 3 4 5) -> (4, 3)
 */
-Relation* Relation::Project(const ColumnNums& colsToKeep)
+Relation Relation::Project(const ColumnNums& colsToKeep)
 {
 	Header newHeader;
 	Tuples newTuples;
@@ -136,6 +140,8 @@ Relation* Relation::Project(const ColumnNums& colsToKeep)
 	{
 		newHeader.push_back(this->header.at(i));
 	}
+	DEBUG_MSG("Old Header: " << this->header.ToString());
+	DEBUG_MSG("New Header: " << newHeader.ToString());
 	for (Tuple t : tuples)
 	{
 		Tuple newTuple;
@@ -145,8 +151,37 @@ Relation* Relation::Project(const ColumnNums& colsToKeep)
 		}
 		newTuples.insert(newTuple);
 	}
+	auto rel = Relation(name, newHeader, newTuples);
+	DEBUG_MSG(rel.ToString());
+	return rel;
+}
 
-	return new Relation(name, newHeader, newTuples);
+Relation Relation::Rename(const ColumnNames& newColumns)
+{
+	if (Debugger::enabled)
+	{
+		DEBUG_MSG("Renaming header to: ");
+		string output = "   ";
+		for (auto& p : newColumns)
+		{
+			output += p + ", ";
+		}
+		DEBUG_MSG(output);
+	}
+	return Relation{this, Header(newColumns)};
+}
+
+string Relation::ToString() const
+{
+	stringstream out;
+	for (Tuple t : tuples)
+	{
+		if (!t.empty())
+		{
+			out << "  " << t.ToString(header) << endl;
+		}
+	}
+	return out.str();
 }
 
 void Relation::AddTuple(Tuple t)
@@ -184,15 +219,12 @@ void Relation::SetTuples(const set<Tuple>& tuples)
 	Relation::tuples = tuples;
 }
 
-string Relation::ToString()
+unsigned int Relation::size() const
 {
-	stringstream out;
-	for (Tuple t : tuples)
-	{
-		if (t.size() > 0)
-		{
-			out << t.ToString(header) << endl;
-		}
-	}
-	return out.str();
+	return tuples.size();
+}
+
+bool Relation::empty() const
+{
+	return tuples.empty();
 }

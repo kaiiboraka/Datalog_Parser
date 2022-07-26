@@ -7,8 +7,7 @@
 typedef vector<Parameter> Parameters;
 typedef vector<string> Values;
 typedef vector<string> ColumnNames;
-typedef vector<unsigned int> ColumnNums;
-
+typedef vector<Index> ColumnNums;
 class Header
 {
 	ColumnNames columns;
@@ -24,7 +23,7 @@ public:
 //		}
 //	}
 
-	const ColumnNames& GetColumns() const
+	[[nodiscard]] const ColumnNames& GetColumns() const
 	{
 		return columns;
 	}
@@ -40,7 +39,7 @@ public:
 		return columns.size();
 	}
 
-	string& at(unsigned int index)
+	string& at(Index index)
 	{
 		Helper::CheckBounds(index, columns);
 		return columns.at(index);
@@ -49,6 +48,16 @@ public:
 	void push_back(string value)
 	{
 		columns.push_back(value);
+	}
+
+	[[nodiscard]] string ToString() const
+	{
+		string output;
+		for (auto& p : columns)
+		{
+			output += p + ", ";
+		}
+		return output;
 	}
 
 };
