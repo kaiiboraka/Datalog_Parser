@@ -124,11 +124,11 @@ DatalogProgram& Parser::Run(ostream& os)
 	try
 	{
 		Datalog();
-		if (Debugger::enabled)
+/*		if (Debugger::enabled)
 		{
 			os << "Success!" << endl;
-//			os << dp.ToString();
-		}
+			os << dp.ToString();
+		}*/
 	}
 	catch (Token& errorToken)
 	{
@@ -186,10 +186,10 @@ parameter		->	STRING | ID
 //					 RULES COLON ruleList QUERIES COLON query queryList EOF
 void Parser::Datalog()
 {
-	// if (Debugger::enabled)
-		PrintStart(__FUNCTION__,
-				   "datalogProgram -> SCHEMES COLON scheme schemeList FACTS COLON factList\n"
-				   "\tRULES COLON ruleList QUERIES COLON query queryList EOF");
+//	if (Debugger::enabled)
+//		PrintStart(__FUNCTION__,
+//				   "datalogProgram -> SCHEMES COLON scheme schemeList FACTS COLON factList\n"
+//				   "\tRULES COLON ruleList QUERIES COLON query queryList EOF");
 	step = 0;
 	// if (Debugger::enabled) PrintStep();
 

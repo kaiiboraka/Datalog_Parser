@@ -11,10 +11,7 @@ class Parser
 
 	vector<Token> tokens;
 	DatalogProgram dp;
-public:
-	const DatalogProgram& GetDatalogProgram() const;
 private:
-
 	Index currTokenIdx, step;
 
 	vector<TokenType> steps =
@@ -26,12 +23,14 @@ private:
 			END_OF_FILE
 		};
 
+
 public:
 
 	Parser() = default;
 
 	explicit Parser(const vector<Token>& tokens);
 
+	const DatalogProgram& GetDatalogProgram() const;
 	string PrevTokenString();
 
 	string CurrTokenString();
@@ -54,7 +53,7 @@ public:
 
 	void PrintStart(const string& funcName, const string& grammar);
 
-	void PrintEnd(const string& funcName) ;
+	void PrintEnd(const string& funcName);
 
 	DatalogProgram& Run(ostream& os = cout);
 

@@ -9,9 +9,10 @@ void DatalogProgram::AddFact(const Predicate& fact)
 {
 	facts.push_back(fact);
 }
-void DatalogProgram::AddRule(const Rule& rule)
+void DatalogProgram::AddRule(Rule& rule)
 {
-	rules.push_back(rule);
+	rule.SetID(rules.size());
+	rules.insert(rule);
 }
 void DatalogProgram::AddQuery(const Predicate& query)
 {

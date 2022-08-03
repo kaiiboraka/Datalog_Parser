@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <list>
 #include <fstream>
 #include <string>
 #include <map>
@@ -11,6 +12,8 @@
 
 #include "Debugger.h"
 typedef unsigned int Index;
+typedef unsigned int Count;
+typedef std::list<Index> Indices;
 using namespace std;
 
 class Helper
@@ -33,6 +36,7 @@ public:
 		}
 		stringstream buffer;
 		buffer << input_file.rdbuf();
+		input_file.close();
 		return buffer.str();
 	}
 

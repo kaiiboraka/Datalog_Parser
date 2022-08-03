@@ -37,7 +37,6 @@ vector<Token> Lexer::Run()
 	{
 		RunAutomata(reducedInput, line);
 	}
-
 	AddToken(Token(Symbols.at(END_OF_FILE), END_OF_FILE, line));
 
 //	if (Debugger::enabled)		PrintTokensList();
@@ -53,9 +52,7 @@ vector<Token> Lexer::Run(const string& outsideInput)
 	{
 		RunAutomata(reducedInput, line);
 	}
-
 	AddToken(Token(Symbols.at(END_OF_FILE), END_OF_FILE, line));
-
 //	if (Debugger::enabled)
 //	{
 //		PrintTokensList();
@@ -75,6 +72,27 @@ void Lexer::PrintTokensList()
 	ofs << "Total Tokens = " << tokens.size() << endl;
 }
 
+void Lexer::RunAutomata(string& input, unsigned int& lineNum)
+{
+	Automaton* maxAutomaton = automata.at(0);
+	unsigned int maxRead = 0;
+	TrimWhitespace(input, lineNum);
+	for (auto currentAutomaton : automata)
+	{
+		CompareResults(input, currentAutomaton, maxAutomaton, maxRead);
+	}
+	if (maxAutomaton->GetType() == END_OF_FILE)
+	{
+		return;
+	}
+	string substr = input.substr(0, maxRead);
+	AddToken(Token(substr, maxAutomaton->GetType(), lineNum));
+	lineNum += maxAutomaton->GetNewLinesRead();
+
+	input = input.substr(maxRead);
+
+}
+
 void Lexer::TrimWhitespace(string& input, unsigned int& lineNum)
 {
 	while (isspace(input.front()) && !input.empty())
@@ -85,27 +103,6 @@ void Lexer::TrimWhitespace(string& input, unsigned int& lineNum)
 		}
 		input = input.substr(1);
 	}
-}
-
-void Lexer::RunAutomata(string& input, unsigned int& lineNum)
-{
-	Automaton* maxAutomaton = automata.at(0);
-	unsigned int maxRead = 0;
-	TrimWhitespace(input, lineNum);
-	for (auto currentAutomaton : automata)
-	{
-		CompareResults(input, currentAutomaton, maxAutomaton, maxRead);
-	}
-	string substr = input.substr(0, maxRead);
-	if (maxAutomaton->GetType() == END_OF_FILE)
-	{
-		return;
-	}
-	AddToken(Token(substr, maxAutomaton->GetType(), lineNum));
-	lineNum += maxAutomaton->GetNewLinesRead();
-
-	input = input.substr(maxRead, input.size());
-
 }
 
 void

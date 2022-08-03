@@ -15,6 +15,11 @@ const vector<Predicate>& Rule::GetBody() const
 	return body;
 }
 
+Index Rule::GetID() const
+{
+	return ID;
+}
+
 void Rule::SetHead(const Predicate& newHead)
 {
 	head = newHead;
@@ -23,6 +28,11 @@ void Rule::SetHead(const Predicate& newHead)
 void Rule::SetBody(const vector<Predicate>& newBody)
 {
 	body = newBody;
+}
+
+void Rule::SetID(Index id)
+{
+	ID = id;
 }
 
 void Rule::AddPredicate(const Predicate& predicate)
@@ -41,4 +51,9 @@ string Rule::ToString() const
 		sep = Symbols[COMMA];
 	}
 	return out.str();
+}
+
+Predicate& Rule::at(Index i)
+{
+	return body.at(i);
 }

@@ -6,13 +6,13 @@ class Predicate
 {
 	string name;
 	Parameters parameters;
-
+	// name(parameters[0], ...)
 public:
 	Predicate() = default;
-
+	Predicate(const string& name)
+		: name(name) {}
 	Predicate(Parameters& parameters, const string& name = "")
-		: name(name), parameters(parameters)
-	{}
+		: name(name), parameters(parameters) {}
 
 	[[nodiscard]] const string& GetName() const;
 	[[nodiscard]] const Parameters& GetParameters() const;
@@ -27,6 +27,12 @@ public:
 
 	[[nodiscard]] string ToString() const;
 
+	Predicate& operator=(const string& other)
+	{
+		name = other;
+		return *this;
+	}
+
 	Predicate operator=(vector<string>& other)
 	{
 		Parameters p;
@@ -36,8 +42,7 @@ public:
 		}
 		return Predicate{p};
 	}
-
-	bool operator==(const string& other)
+	bool operator==(const string& other) const
 	{
 		return this->name == other;
 	}

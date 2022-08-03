@@ -7,6 +7,7 @@
 #include "DatalogProgram.h"
 #include "Relation.h" // will be in db
 #include "Database.h"
+#include "Graph.h"
 class Interpreter
 {
 	DatalogProgram datalogProgram;
@@ -27,9 +28,17 @@ public:
 	void EvaluateRules();
 	void EvaluateQueries();
 
-	Relation EvaluatePredicate(const Predicate& query);
+	Relation* EvaluatePredicate(const Predicate& query);
+	void PrintRule(const Rule& ruleToPrint, ostream& out = cout);
 	void PrintQueries(ostream& out = cout);
 	void Clear();
+	static Relation* JoinIntermediates(const vector<Relation*>& intermediates);
+	vector<Relation*> EvaluateRuleBody(const Rule& rule);
+	Relation* ProjectBodyToHead(const Predicate& headPredicate, Relation* joined) const;
+	Relation* RenameBodyToHead(const Relation& targetTable, Relation* joined) const;
+	void ProcessRules(const Rules& rulesToProcess);
+	static Rules ReverseRules(const Rules& oldRules);
+	void ProcessRule(const Rule& rule);
 };
 
 

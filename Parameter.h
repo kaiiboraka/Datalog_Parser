@@ -8,6 +8,7 @@ class Parameter
 {
 	string value;
 	bool constant;
+
 public:
 	Parameter() = default;
 	explicit Parameter(const string& value) : value(value)
@@ -23,14 +24,18 @@ public:
 	{
 		return Parameter{other};
 	}
+
 	const bool& isConstant() const
 	{
 		return constant;
 	}
+
+
 	static bool IsConstant(const string& other)
 	{
-		return (other.front() == '\'' && other.back() == '\'');
+		return (other.front() == Symbols[STRING].front());// && other.back() == '\'');
 	}
+
 	bool operator==(const string& other)
 	{
 		return this->value == other;

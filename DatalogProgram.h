@@ -5,12 +5,13 @@
 #include "Output.h"
 #include "Rule.h"
 typedef vector<Predicate> Predicates;
-typedef vector<Rule> Rules;
+typedef set<Rule> Rules;
 class DatalogProgram
 {
 	Predicates schemes;
 	Predicates facts;
 	Rules rules;
+	// Predicate :- Predicates
 	Predicates queries;
 	set<string> domain;
 	vector<TokenType> order =
@@ -38,7 +39,7 @@ public:
 
 	void AddScheme(const Predicate& scheme);
 	void AddFact(const Predicate& fact);
-	void AddRule(const Rule& rule);
+	void AddRule(Rule& rule);
 	void AddQuery(const Predicate& query);
 	void AddStringToDomain(const string& newString);
 

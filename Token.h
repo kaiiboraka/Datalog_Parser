@@ -69,7 +69,7 @@ namespace Tokens
 		{STRING,      "'"},
 		{COMMENT,     "#"},
 		{UNDEFINED,   TokenNames[UNDEFINED]},
-		{END_OF_FILE, ""},
+		{END_OF_FILE, "EOF"},
 		{TYPE_COUNT,  ""},
 	};
 

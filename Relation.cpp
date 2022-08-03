@@ -1,10 +1,13 @@
 #include "Relation.h"
 
+#ifndef __GNUC__
+#pragma region Constructors
+#endif
+
 Relation::Relation(const string& newName) : name(newName)
 {
 
 }
-
 
 Relation::Relation(const Relation* other, const string& which) :
 	name(other->name)
@@ -44,41 +47,45 @@ Relation::Relation(const string& newName, const Header& newHeader,
 
 }
 
-Relation Relation::Select(unsigned int colIdx, const string& expectedValue)
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+Relation* Relation::Select(unsigned int colIdx, const string& expectedValue)
 {
 	Helper::CheckBounds(colIdx, header.GetColumns());
 	//	output.SetHeader(this->header);
 	//	output.SetName("SELECT(" + this->name + ")");
 //	Relation output(this, "select");
-	Relation output(name, header);
+	Relation* output = new Relation(name, header);
 
 	for (Tuple t : tuples)
 	{
 		if (t.at(colIdx) == expectedValue)
 		{
-			output.AddTuple(t);
+			output->insert(t);
 		}
 	}
-	DEBUG_MSG("Select 1:" << endl << output.ToString());
+	//DEBUG_MSG("Select 1:" << endl << output->ToString());
 	return output;
 }
 
-Relation Relation::Select(unsigned int col1, unsigned int col2)
+Relation* Relation::Select(unsigned int col1, unsigned int col2)
 {
 	Helper::CheckBounds(col1, header.GetColumns());
 	Helper::CheckBounds(col2, header.GetColumns());
 	//	output.SetHeader(this->header);
 	//	output.SetName("SELECT(" + this->name + ")");
 	//Relation output(this, "select");
-	Relation output(name, header);
+	Relation* output = new Relation(name, header);
 	for (Tuple t : tuples)
 	{
 		if (t.at(col1) == t.at(col2))
 		{
-			output.AddTuple(t);
+			output->insert(t);
 		}
 	}
-	DEBUG_MSG("Select 2:" << endl << output.ToString());
+	//DEBUG_MSG("Select 2:" << endl << output->ToString());
 	return output;
 }
 
@@ -95,12 +102,29 @@ Relation Relation::Select(unsigned int col1, unsigned int col2)
 
 	return output;
 */
-Relation Relation::Rename(unsigned int colToRename, const string& newName)
+Relation* Relation::Rename(Index colToRename, const string& newName)
 {
 	Header newHeader = header;
 	newHeader.at(colToRename) = newName;
 
-	return Relation{this, newHeader};
+	return new Relation{this, newHeader};
+}
+
+Relation* Relation::Rename(const ColumnNames& newColumns)
+{
+
+	if (Debugger::enabled)
+	{
+		DEBUG_MSG("Renaming header to: ");
+		string output = "   ";
+		for (auto& p : newColumns)
+		{
+			output += p + ", ";
+		}
+		DEBUG_MSG(output);
+	}
+
+	return new Relation{this, Header(newColumns)};
 }
 
 /*
@@ -132,15 +156,17 @@ Relation Relation::Rename(unsigned int colToRename, const string& newName)
 	 add newTuple into output relation
 	 (1 2 3 4 5) -> (4, 3)
 */
-Relation Relation::Project(const ColumnNums& colsToKeep)
+Relation* Relation::Project(const ColumnNums& colsToKeep)
 {
+	DEBUG_MSG("Old Header: " << this->header.ToString());
 	Header newHeader;
 	Tuples newTuples;
 	for (auto& i : colsToKeep)
 	{
+		DEBUG_MSG("colToKeep: " << i);
 		newHeader.push_back(this->header.at(i));
 	}
-	DEBUG_MSG("Old Header: " << this->header.ToString());
+
 	DEBUG_MSG("New Header: " << newHeader.ToString());
 	for (Tuple t : tuples)
 	{
@@ -149,45 +175,125 @@ Relation Relation::Project(const ColumnNums& colsToKeep)
 		{
 			newTuple.push_back(t.at(i));
 		}
+		DEBUG_MSG("newTuple size: " << newTuple.size());
 		newTuples.insert(newTuple);
 	}
-	auto rel = Relation(name, newHeader, newTuples);
-	DEBUG_MSG(rel.ToString());
-	return rel;
+	DEBUG_MSG("newTuples size: " << newTuples.size());
+	return new Relation{name, newHeader, newTuples};
 }
 
-Relation Relation::Rename(const ColumnNames& newColumns)
+#ifndef __GNUC__
+#pragma region Natural Join
+#endif
+
+Relation* Relation::NaturalJoin(Relation* other)
 {
-	if (Debugger::enabled)
+	Relation* outputTable = new Relation();
+
+	// set name of output relation
+	outputTable->SetName(this->GetName() + " |x| " + other->GetName());
+
+	// calculate header overlap of 'this' and 'other' relations
+	/*
+		let Header h1 be r1's header
+		let Header h2 be r2's header
+
+		initialize overlap (what type should this be? maybe a map or 2 vectors?)
+		initialize uniqueCols (what type should this be? maybe a vector or set)
+
+		for index2 = 0 to h2.size():
+			found = false
+
+			for index1 = 0 to h1.size():
+				if (h1[index1] == h2[index2]):
+					found = true
+					add index1, index2 to your overlap structure
+				end if
+			end index1 for loop
+
+			if (not found):
+				add index2 to uniqueCols
+			end if
+		end index2 for loop
+	 */
+	Header thisHeader = this->GetHeader();
+	Header otherHeader = other->GetHeader();
+
+	HeaderOverlap headerOverlap = HeaderOverlap::FindHeaderOverlap(thisHeader, otherHeader);
+
+	// combine headers -- will be the header for 'output'
+	outputTable->SetHeader(CombineHeaders(thisHeader, otherHeader, headerOverlap.uniqueColumns));
+
+	// combine tuples -- will be the tuples for
+	for (auto rowThis : this->GetTuples())
 	{
-		DEBUG_MSG("Renaming header to: ");
-		string output = "   ";
-		for (auto& p : newColumns)
+		for (auto rowOther : other->GetTuples())
 		{
-			output += p + ", ";
+			if (IsJoinable(rowThis, rowOther, headerOverlap.valueOverlaps))
+			{
+				outputTable->insert(CombineTuples(rowThis, rowOther, headerOverlap.uniqueColumns));
+			}
 		}
-		DEBUG_MSG(output);
 	}
-	return Relation{this, Header(newColumns)};
+
+	return outputTable;
 }
 
-string Relation::ToString() const
+bool Relation::IsJoinable(Tuple& t1, Tuple& t2, const map<Index, Index>& valueOverlaps)
 {
-	stringstream out;
-	for (Tuple t : tuples)
+	for (auto& index : valueOverlaps)
 	{
-		if (!t.empty())
+		if (t1.at(index.first) != t2.at(index.second))
 		{
-			out << "  " << t.ToString(header) << endl;
+			return false;
 		}
 	}
-	return out.str();
+	return true;
 }
 
-void Relation::AddTuple(Tuple t)
+Header Relation::CombineHeaders(const Header& headerThis, Header& headerOther, const set<Index>& uniqueColumns)
 {
-	tuples.insert(t);
+	Header newHeader(headerThis.GetColumns());
+	for (auto& i : uniqueColumns)
+	{
+		newHeader.push_back(headerOther.at(i));
+	}
+	return newHeader;
 }
+
+Tuple Relation::CombineTuples(Tuple& thisRow, Tuple& otherRow, const set<Index>& uniqueColumns)
+{
+	Tuple newTuple(thisRow.GetValues());
+	for (auto i : uniqueColumns)
+	{
+		newTuple.push_back(otherRow.at(i));
+	}
+	return newTuple;
+}
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+pair<Tuples::iterator, bool> Relation::insert(const Tuple& t)
+{
+	return tuples.insert(t);
+}
+
+void Relation::Union(Relation* tableToJoin)
+{
+	for (Tuple row : tableToJoin->GetTuples())
+	{
+		if (insert(row).second)
+		{
+			cout << "  " << row.ToString(tableToJoin->GetHeader()) << endl;
+		}
+	}
+}
+
+#ifndef __GNUC__
+#pragma region Getters & Setters
+#endif
 
 const string& Relation::GetName() const
 {
@@ -227,4 +333,78 @@ unsigned int Relation::size() const
 bool Relation::empty() const
 {
 	return tuples.empty();
+}
+
+string Relation::ToString() const
+{
+	stringstream out;
+	for (Tuple t : tuples)
+	{
+		if (!t.empty())
+		{
+			out << "  " << t.ToString(header) << endl;
+		}
+	}
+	return out.str();
+}
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+HeaderOverlap HeaderOverlap::FindHeaderOverlap(Header thisHeader, Header otherHeader)
+{
+	HeaderOverlap newCombo;
+	for (Index otherIndex = 0; otherIndex < otherHeader.size(); otherIndex++)
+	{
+		bool found = false;
+		for (Index thisIndex = 0; thisIndex < thisHeader.size(); thisIndex++)
+		{
+			if (thisHeader.at(thisIndex) == otherHeader.at(otherIndex))
+			{
+				found = true;
+				newCombo.valueOverlaps.insert({thisIndex, otherIndex});
+				newCombo.numsInCommon.push_back(otherIndex);
+
+				// TODO: return a struct with num pair and bool? or just pair?
+			}
+		}
+		if (!found)
+		{
+			newCombo.uniqueColumns.insert(otherIndex);
+		}
+	}
+	return newCombo;
+}
+
+HeaderOverlap HeaderOverlap::FindHeaderOverlap(const Predicate& headPredicate, Header joinedTableHeader)
+{
+	HeaderOverlap newCombo;
+
+	const auto& headParameters = headPredicate.GetParameters();
+
+	map<string, Index> joinedTableMap;
+	for (Index iH = 0; iH < joinedTableHeader.size(); iH++)
+	{
+		joinedTableMap.insert({joinedTableHeader.at(iH), iH});
+	}
+
+	for (Index iP = 0; iP < headParameters.size(); iP++)
+	{
+		const auto& parameter = headParameters.at(iP);
+		auto iter = joinedTableMap.find(parameter);
+		if (iter != joinedTableMap.end())
+		{
+			DEBUG_MSG("parameters at " << iP << ": " << string(parameter));
+			DEBUG_MSG("map[" << string(parameter) << "]:" << joinedTableMap[parameter]);
+			newCombo.numsInCommon.push_back(joinedTableMap[parameter]);
+		}
+		else
+			newCombo.uniqueColumns.insert(joinedTableMap[parameter]);
+
+		// TODO: return a struct with num pair and bool? or just pair?
+	}
+
+
+	return newCombo;
 }

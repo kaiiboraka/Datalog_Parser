@@ -17,7 +17,7 @@ public:
 	{
 		if (size() != header.size())
 		{
-			throw "sizes do not match";
+			throw invalid_argument("sizes do not match");
 		}
 		stringstream out;
 		string sep = "";

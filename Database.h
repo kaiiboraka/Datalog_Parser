@@ -5,12 +5,16 @@ typedef map<string, Relation> DatabaseMap;
 class Database
 {
 	DatabaseMap databaseMap;
+	unsigned int rowCount;
 public:
-	Database() = default;
-
-	Relation GetRelation(const string& query)
+	Database()
 	{
-		return databaseMap[query];
+		TallyRows();
+	}
+
+	Relation& GetRelation(const string& tableName)
+	{
+		return databaseMap[tableName];
 	}
 
 	DatabaseMap& GetDB()
@@ -21,5 +25,20 @@ public:
 	void AddRelation(const Relation& r)
 	{
 		databaseMap.insert({r.GetName(), r});
+	}
+
+	void TallyRows()
+	{
+		rowCount = 0;
+		for(const auto& tablePair : databaseMap)
+		{
+			rowCount += tablePair.second.size();
+		}
+	}
+
+	const unsigned int& TotalRows()
+	{
+		TallyRows();
+		return rowCount;
 	}
 };

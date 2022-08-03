@@ -8,6 +8,7 @@ typedef vector<Parameter> Parameters;
 typedef vector<string> Values;
 typedef vector<string> ColumnNames;
 typedef vector<Index> ColumnNums;
+
 class Header
 {
 	ColumnNames columns;
@@ -39,6 +40,16 @@ public:
 		return columns.size();
 	}
 
+	vector<string>::iterator begin()
+	{
+		return columns.begin();
+	}
+	vector<string>::iterator end()
+	{
+		return columns.end();
+	}
+
+
 	string& at(Index index)
 	{
 		Helper::CheckBounds(index, columns);
@@ -59,5 +70,7 @@ public:
 		}
 		return output;
 	}
+
+
 
 };
